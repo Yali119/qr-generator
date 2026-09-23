@@ -2,13 +2,19 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>28位二维码批量生成器 · LID + 模块ID</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>二维码工具箱 · 生成 + 互转</title>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script>
+        if (typeof QRCode === 'undefined') {
+            document.write('<script src="https://lib.baomitu.com/qrcodejs/1.0.0/qrcode.min.js"><\/script>');
+        }
+    </script>
     <style>
         * {
             box-sizing: border-box;
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
         body {
             background: #f5f7fb;
@@ -17,13 +23,14 @@
             align-items: flex-start;
             min-height: 100vh;
             margin: 0;
-            padding: 24px 16px;
+            padding: 16px;
+            padding-bottom: 40px;
         }
         .card {
             background: white;
             border-radius: 28px;
             box-shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.2);
-            padding: 28px 24px;
+            padding: 24px 20px;
             max-width: 720px;
             width: 100%;
         }
@@ -45,7 +52,7 @@
             75% { transform: rotate(8deg); }
         }
         h1 {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 600;
             margin: 0;
             color: #0b1b2f;
@@ -53,33 +60,36 @@
         }
         .subhead {
             color: #4b5b6b;
-            font-size: 0.95rem;
-            margin-bottom: 24px;
+            font-size: 0.82rem;
+            margin-bottom: 16px;
             padding-bottom: 12px;
             border-bottom: 1px solid #e2e8f0;
             line-height: 1.5;
         }
         .subhead code {
             background: #eef2f6;
-            padding: 3px 8px;
+            padding: 2px 6px;
             border-radius: 20px;
-            font-size: 0.85rem;
+            font-size: 0.73rem;
             color: #1e3a5f;
             font-weight: 500;
+            word-break: break-all;
         }
-        .mode-switch {
+
+        /* ===== 顶层标签 ===== */
+        .top-tabs {
             display: flex;
             background: #f0f4fa;
             border-radius: 40px;
             padding: 4px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             gap: 4px;
         }
-        .mode-btn {
+        .top-tab {
             flex: 1;
             border: none;
             background: transparent;
-            padding: 12px 16px;
+            padding: 14px 12px;
             border-radius: 36px;
             font-weight: 600;
             font-size: 0.95rem;
@@ -91,41 +101,76 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
+            -webkit-appearance: none;
+            appearance: none;
         }
-        .mode-btn.active {
+        .top-tab.active {
             background: white;
             color: #0b1b2f;
             box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.15);
         }
-        .mode-btn:hover:not(.active) {
-            color: #1e3a5f;
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ===== 子标签 ===== */
+        .sub-tabs {
+            display: flex;
+            background: #f0f4fa;
+            border-radius: 40px;
+            padding: 4px;
+            margin-bottom: 20px;
+            gap: 4px;
         }
-        .panel {
-            display: none;
+        .sub-tab {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 11px 12px;
+            border-radius: 36px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            color: #4f6f8f;
+            transition: 0.2s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            -webkit-appearance: none;
+            appearance: none;
         }
-        .panel.active {
-            display: block;
+        .sub-tab.active {
+            background: white;
+            color: #0b1b2f;
+            box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.15);
         }
+
+        .sub-panel { display: none; }
+        .sub-panel.active { display: block; }
+
+        /* ===== 输入 ===== */
         .input-row {
             display: flex;
-            gap: 16px;
+            gap: 12px;
             flex-wrap: wrap;
-            margin-bottom: 18px;
+            margin-bottom: 14px;
         }
         .input-group {
             display: flex;
             flex-direction: column;
             gap: 6px;
             flex: 1;
-            min-width: 160px;
+            min-width: 140px;
         }
         .input-group.narrow {
-            flex: 0 0 130px;
-            min-width: 130px;
+            flex: 0 0 100px;
+            min-width: 100px;
         }
         label {
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #1e2f40;
             display: flex;
             align-items: center;
@@ -134,14 +179,14 @@
         label .badge {
             background: #d9e2ec;
             color: #1e3a5f;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             padding: 2px 8px;
             border-radius: 20px;
             font-weight: 400;
             letter-spacing: 0.3px;
         }
         input {
-            padding: 14px 16px;
+            padding: 14px 14px;
             border-radius: 16px;
             border: 1.5px solid #d0dae6;
             font-size: 1rem;
@@ -149,6 +194,8 @@
             transition: 0.2s;
             background: #fbfdff;
             width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
         }
         input:focus {
             border-color: #2d7aff;
@@ -166,24 +213,27 @@
             cursor: default;
             border-style: dashed;
         }
+
         .error-message {
             color: #c53030;
             font-size: 0.8rem;
             margin-top: 4px;
             min-height: 1.2em;
         }
+
+        /* ===== 按钮 ===== */
         .actions {
             display: flex;
             gap: 12px;
             margin-top: 8px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
         .btn {
             border: none;
             border-radius: 40px;
-            padding: 14px 22px;
+            padding: 14px 20px;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: 0.2s;
             display: flex;
@@ -194,18 +244,17 @@
             border: 1.5px solid #cfdceb;
             color: #1e3a5f;
             flex: 1;
+            font-family: inherit;
+            -webkit-appearance: none;
+            appearance: none;
         }
         .btn-primary {
             background: #0b1b2f;
             color: white;
             border: 1.5px solid #0b1b2f;
         }
-        .btn-primary:hover {
+        .btn-primary:active {
             background: #1e3a5f;
-            border-color: #1e3a5f;
-        }
-        .btn:hover {
-            background: #f0f4fa;
         }
         .btn:active {
             transform: scale(0.98);
@@ -246,43 +295,34 @@
             background: #fbfdff;
             border: 1.5px solid #e2e8f0;
             border-radius: 24px;
-            padding: 20px 24px;
+            padding: 20px;
             display: flex;
             align-items: center;
-            gap: 24px;
+            gap: 20px;
             transition: 0.25s;
             position: relative;
-        }
-        .qr-row:hover {
-            border-color: #2d7aff;
-            box-shadow: 0 8px 20px -8px rgba(45, 122, 255, 0.3);
         }
         .qr-row .qr-img-wrap {
             flex-shrink: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 200px;
-            height: 200px;
+            width: 180px;
+            height: 180px;
             background: white;
             border-radius: 16px;
             border: 1px solid #e2e8f0;
-            padding: 8px;
+            padding: 6px;
             cursor: zoom-in;
             transition: 0.2s;
             position: relative;
         }
-        .qr-row .qr-img-wrap:hover {
-            border-color: #2d7aff;
-            box-shadow: 0 4px 16px -4px rgba(45, 122, 255, 0.4);
-            transform: scale(1.02);
-        }
         .qr-row .qr-img-wrap::after {
             content: '🔍';
             position: absolute;
-            bottom: 6px;
-            right: 6px;
-            font-size: 0.9rem;
+            bottom: 4px;
+            right: 4px;
+            font-size: 0.8rem;
             background: rgba(255, 255, 255, 0.9);
             border-radius: 6px;
             padding: 2px 6px;
@@ -290,7 +330,7 @@
             transition: 0.2s;
             pointer-events: none;
         }
-        .qr-row .qr-img-wrap:hover::after {
+        .qr-row .qr-img-wrap:active::after {
             opacity: 1;
         }
         .qr-row .qr-img-wrap img,
@@ -305,19 +345,19 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
             min-width: 0;
         }
         .qr-row .qr-info-top {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
         .qr-row .idx-badge {
             background: #0b1b2f;
             color: white;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
             padding: 3px 10px;
             border-radius: 12px;
@@ -325,11 +365,11 @@
         }
         .qr-row .lid-label {
             font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 700;
             color: #1e3a5f;
             background: #eef2f6;
-            padding: 6px 14px;
+            padding: 5px 12px;
             border-radius: 10px;
             letter-spacing: 0.03em;
             word-break: break-all;
@@ -340,7 +380,7 @@
             gap: 4px;
         }
         .qr-row .info-label {
-            font-size: 0.72rem;
+            font-size: 0.66rem;
             color: #7c8b9c;
             text-transform: uppercase;
             letter-spacing: 0.06em;
@@ -348,38 +388,46 @@
         }
         .qr-row .code-full {
             font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 0.85rem;
+            font-size: 0.76rem;
             font-weight: 600;
             color: #0b1b2f;
             background: #f0f6fe;
-            padding: 8px 12px;
+            padding: 7px 10px;
             border-radius: 10px;
             border: 1px solid #cbdae9;
             word-break: break-all;
             line-height: 1.4;
         }
+        .qr-row .code-uid {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: #6b21a8;
+            background: #faf5ff;
+            padding: 7px 10px;
+            border-radius: 10px;
+            border: 1px solid #e9d5ff;
+            word-break: break-all;
+            line-height: 1.4;
+        }
         .qr-row .dl-btn {
             position: absolute;
-            top: 16px;
-            right: 16px;
+            top: 12px;
+            right: 12px;
             background: white;
             border: 1px solid #d0dae6;
             border-radius: 10px;
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             font-size: 1rem;
-            opacity: 0;
             transition: 0.2s;
             color: #4f6f8f;
         }
-        .qr-row:hover .dl-btn {
-            opacity: 1;
-        }
-        .qr-row .dl-btn:hover {
+        .qr-row .dl-btn:active {
             background: #2d7aff;
             color: white;
             border-color: #2d7aff;
@@ -387,7 +435,7 @@
 
         .placeholder-text {
             color: #8a9db0;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -399,11 +447,67 @@
             font-size: 1.5rem;
             opacity: 0.5;
         }
+
+        /* ===== 单个二维码 ===== */
+        .single-qr-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 24px 16px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 16px;
+            min-height: 240px;
+        }
+        #singleQrcode {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-in;
+        }
+        #singleQrcode img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+        }
+
+        .result-info {
+            background: #f0f6fe;
+            border-radius: 20px;
+            padding: 14px 16px;
+            margin-top: 6px;
+            word-break: break-all;
+        }
+        .result-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #4f6f8f;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        .result-code {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #0b1b2f;
+            background: #ffffffd0;
+            padding: 8px 10px;
+            border-radius: 14px;
+            border: 1px solid #cbdae9;
+            word-break: break-all;
+            line-height: 1.4;
+        }
+
+        /* ===== 规则提示 ===== */
         .rule-hint {
             background: #f8fafd;
             border-radius: 14px;
-            padding: 12px 16px;
-            font-size: 0.8rem;
+            padding: 12px 14px;
+            font-size: 0.75rem;
             color: #4a627a;
             margin-top: 10px;
             border: 1px dashed #b8ccdd;
@@ -414,24 +518,18 @@
         }
         .rule-hint code {
             background: #eef2f6;
-            padding: 2px 6px;
+            padding: 2px 5px;
             border-radius: 12px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
+            word-break: break-all;
         }
-        .footer-note {
-            font-size: 0.75rem;
-            color: #7c8b9c;
-            text-align: center;
-            margin-top: 20px;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 16px;
-        }
+
         .range-hint {
             background: #fff9e6;
             border: 1px solid #ffe58f;
             border-radius: 12px;
             padding: 8px 12px;
-            font-size: 0.78rem;
+            font-size: 0.75rem;
             color: #8c6d1f;
             margin-top: 6px;
             display: flex;
@@ -449,6 +547,7 @@
             border-color: #fecaca;
             color: #b91c1c;
         }
+
         .progress-bar {
             height: 4px;
             background: #e2e8f0;
@@ -469,7 +568,7 @@
         }
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
+            padding: 50px 20px;
             color: #8a9db0;
         }
         .empty-state .big {
@@ -479,71 +578,110 @@
             margin-bottom: 12px;
         }
 
-        /* 单个模式 */
-        .single-qr-wrapper {
+        /* ===== 互转面板 ===== */
+        .convert-section {
+            margin-bottom: 8px;
+        }
+        .convert-section h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #0b1b2f;
+            margin: 0 0 12px 0;
             display: flex;
-            justify-content: center;
             align-items: center;
-            background: #ffffff;
-            border-radius: 24px;
-            padding: 28px 16px;
-            border: 1px solid #e2e8f0;
-            margin-bottom: 18px;
-            min-height: 240px;
+            gap: 8px;
         }
-        #singleQrcode {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: zoom-in;
+        .convert-divider {
+            border: none;
+            border-top: 1px dashed #e2e8f0;
+            margin: 22px 0;
         }
-        #singleQrcode img {
-            display: block;
-            max-width: 100%;
-            height: auto;
-            border-radius: 12px;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-        }
-        .result-info {
+        .convert-result-box {
             background: #f0f6fe;
             border-radius: 20px;
             padding: 16px 18px;
-            margin-top: 6px;
+            margin-top: 16px;
             word-break: break-all;
+            position: relative;
         }
-        .result-label {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #4f6f8f;
+        .convert-result-box .result-label {
+            margin-bottom: 6px;
+        }
+        .convert-result-box .result-code {
+            font-size: 1.05rem;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: white;
+            border: 1px solid #d0dae6;
+            border-radius: 10px;
+            padding: 6px 12px;
+            font-size: 0.72rem;
             font-weight: 500;
+            color: #4f6f8f;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            -webkit-appearance: none;
+            appearance: none;
         }
-        .result-code {
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 1.2rem;
+        .copy-btn:active {
+            background: #2d7aff;
+            color: white;
+            border-color: #2d7aff;
+        }
+        .mini-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .mini-btn {
+            border: none;
+            border-radius: 30px;
+            padding: 10px 16px;
             font-weight: 600;
-            color: #0b1b2f;
-            background: #ffffffd0;
-            padding: 8px 12px;
-            border-radius: 14px;
-            margin-top: 6px;
-            border: 1px solid #cbdae9;
-            word-break: break-all;
-            line-height: 1.4;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            background: #0b1b2f;
+            color: white;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .mini-btn:active {
+            background: #1e3a5f;
+        }
+
+        .footer-note {
+            font-size: 0.72rem;
+            color: #7c8b9c;
+            text-align: center;
+            margin-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 14px;
+            line-height: 1.6;
         }
 
         /* ===== 放大模态框 ===== */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(11, 27, 47, 0.75);
+            background: rgba(11, 27, 47, 0.8);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            padding: 24px;
+            padding: 16px;
             opacity: 0;
             visibility: hidden;
             transition: 0.3s;
@@ -555,13 +693,13 @@
         .modal-content {
             background: white;
             border-radius: 28px;
-            padding: 32px;
-            max-width: 520px;
+            padding: 28px 20px;
+            max-width: 480px;
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
             transform: scale(0.9);
             transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.4);
@@ -574,25 +712,26 @@
         }
         .modal-close {
             position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 40px;
-            height: 40px;
+            top: 14px;
+            right: 14px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             border: none;
             background: #f0f4fa;
             color: #4f6f8f;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
         }
-        .modal-close:hover {
+        .modal-close:active {
             background: #0b1b2f;
             color: white;
-            transform: rotate(90deg);
         }
         .modal-qr {
             display: flex;
@@ -600,43 +739,55 @@
             align-items: center;
             background: white;
             border-radius: 20px;
-            padding: 12px;
+            padding: 10px;
             border: 2px solid #e2e8f0;
         }
         .modal-qr img,
         .modal-qr canvas {
             display: block;
-            width: 320px !important;
-            height: 320px !important;
+            width: 280px !important;
+            height: 280px !important;
             border-radius: 12px;
         }
         .modal-info {
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             text-align: center;
         }
         .modal-lid {
             font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 700;
             color: #1e3a5f;
             background: #eef2f6;
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 12px;
             letter-spacing: 0.03em;
             word-break: break-all;
         }
         .modal-code {
             font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 0.85rem;
+            font-size: 0.78rem;
             font-weight: 600;
             color: #0b1b2f;
             background: #f0f6fe;
-            padding: 10px 14px;
+            padding: 10px 12px;
             border-radius: 12px;
             border: 1px solid #cbdae9;
+            word-break: break-all;
+            line-height: 1.5;
+        }
+        .modal-uid {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #6b21a8;
+            background: #faf5ff;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid #e9d5ff;
             word-break: break-all;
             line-height: 1.5;
         }
@@ -645,9 +796,9 @@
             color: white;
             border: none;
             border-radius: 40px;
-            padding: 14px 28px;
+            padding: 14px 24px;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: 0.2s;
             display: flex;
@@ -656,12 +807,13 @@
             gap: 8px;
             font-family: inherit;
             width: 100%;
-            max-width: 280px;
+            max-width: 260px;
+            -webkit-appearance: none;
+            appearance: none;
         }
-        .modal-dl-btn:hover {
+        .modal-dl-btn:active {
             background: #1e3a5f;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px -4px rgba(11, 27, 47, 0.4);
+            transform: scale(0.98);
         }
 
         @media (max-width: 600px) {
@@ -674,23 +826,22 @@
                 width: 100%;
                 height: auto;
                 aspect-ratio: 1;
-                max-width: 280px;
+                max-width: 240px;
                 margin: 0 auto;
             }
             .qr-row .dl-btn {
-                opacity: 1;
-                top: 12px;
-                right: 12px;
+                top: 10px;
+                right: 10px;
                 width: 32px;
                 height: 32px;
             }
-            .modal-content {
-                padding: 24px 16px;
-            }
             .modal-qr img,
             .modal-qr canvas {
-                width: 260px !important;
-                height: 260px !important;
+                width: 240px !important;
+                height: 240px !important;
+            }
+            .modal-content {
+                padding: 24px 16px;
             }
         }
     </style>
@@ -699,111 +850,189 @@
     <div class="card">
         <div class="header">
             <div class="logo">🐱</div>
-            <h1>28位二维码生成器</h1>
+            <h1>二维码工具箱</h1>
         </div>
         <div class="subhead">
-            编码规则：<code>13位LID + 4位模块ID + C8 + LID第8位ASCII十六进制后两位 + LID后五位 + CC</code>
+            二维码生成 + LID ↔ UID 互转 · 一站式工具
         </div>
 
-        <!-- 模式切换 -->
-        <div class="mode-switch">
-            <button class="mode-btn active" data-mode="batch">
-                <span>📦</span> 批量生成
+        <!-- ===== 顶层标签 ===== -->
+        <div class="top-tabs">
+            <button class="top-tab active" data-tab="qr">
+                <span>🔲</span> 二维码生成
             </button>
-            <button class="mode-btn" data-mode="single">
-                <span>1️⃣</span> 单个生成
+            <button class="top-tab" data-tab="convert">
+                <span>🔄</span> LID ↔ UID 互转
             </button>
         </div>
 
-        <!-- ========== 批量模式 ========== -->
-        <div class="panel active" id="batchPanel">
-            <div class="input-row">
-                <div class="input-group">
-                    <label>LID 起始 <span class="badge">13位</span></label>
-                    <input type="text" id="batchLidStart" placeholder="例如 6460907Q99900" maxlength="13" autocomplete="off" value="6460907Q99900">
-                </div>
-                <div class="input-group narrow">
-                    <label>数量 <span class="badge">1-100</span></label>
-                    <input type="number" id="batchCount" placeholder="10" min="1" max="100" autocomplete="off" value="10">
-                </div>
-                <div class="input-group">
-                    <label>LID 结束 <span class="badge">自动计算</span></label>
-                    <input type="text" id="batchLidEnd" placeholder="自动计算" readonly>
-                </div>
-            </div>
-            <div class="input-row">
-                <div class="input-group">
-                    <label>模块ID <span class="badge">4位</span></label>
-                    <input type="text" id="batchModuleId" placeholder="例如 0402" maxlength="4" autocomplete="off" value="0402">
-                </div>
-            </div>
-            <div class="range-hint" id="rangeHint">
-                💡 输入起始 LID 和数量，自动计算结束 LID（最后两位数字递增）
-            </div>
-            <div class="error-message" id="batchError"></div>
-
-            <div class="actions">
-                <button class="btn btn-primary" id="batchGenerateBtn">✨ 批量生成二维码</button>
-                <button class="btn" id="batchClearBtn">清空</button>
+        <!-- ==================================================== -->
+        <!-- ========== 二维码生成面板 =========================== -->
+        <!-- ==================================================== -->
+        <div class="tab-panel active" id="qrPanel">
+            <!-- 子标签 -->
+            <div class="sub-tabs">
+                <button class="sub-tab active" data-sub="batch">
+                    <span>📦</span> 批量生成
+                </button>
+                <button class="sub-tab" data-sub="single">
+                    <span>1️⃣</span> 单个生成
+                </button>
             </div>
 
-            <div class="progress-bar" id="progressBar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-
-            <div id="batchResult">
-                <div class="empty-state">
-                    <span class="big">🖼️</span>
-                    输入起始 LID 和数量，点击生成
+            <!-- 批量生成 -->
+            <div class="sub-panel active" id="batchPanel">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>LID 起始 <span class="badge">13位</span></label>
+                        <input type="text" id="batchLidStart" placeholder="6460907Q99900" maxlength="13" autocomplete="off" value="6460907Q99900">
+                    </div>
+                    <div class="input-group narrow">
+                        <label>数量 <span class="badge">1-100</span></label>
+                        <input type="number" id="batchCount" placeholder="10" min="1" max="100" autocomplete="off" value="10">
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- ========== 单个模式 ========== -->
-        <div class="panel" id="singlePanel">
-            <div class="input-row">
-                <div class="input-group">
-                    <label>LID <span class="badge">13位</span></label>
-                    <input type="text" id="singleLid" placeholder="例如 6460907Q99900" maxlength="13" autocomplete="off" value="6460907Q99900">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>LID 结束 <span class="badge">自动计算</span></label>
+                        <input type="text" id="batchLidEnd" placeholder="自动计算" readonly>
+                    </div>
+                    <div class="input-group">
+                        <label>模块ID <span class="badge">4位</span></label>
+                        <input type="text" id="batchModuleId" placeholder="0402" maxlength="4" autocomplete="off" value="0402">
+                    </div>
                 </div>
-                <div class="input-group">
-                    <label>模块ID <span class="badge">4位</span></label>
-                    <input type="text" id="singleModuleId" placeholder="例如 0402" maxlength="4" autocomplete="off" value="0402">
+                <div class="range-hint" id="rangeHint">
+                    💡 输入起始 LID 和数量，自动计算结束 LID
                 </div>
-            </div>
-            <div class="error-message" id="singleError"></div>
+                <div class="error-message" id="batchError"></div>
 
-            <div class="actions">
-                <button class="btn btn-primary" id="singleGenerateBtn">✨ 生成二维码</button>
-                <button class="btn" id="singleClearBtn">清空</button>
-            </div>
+                <div class="actions">
+                    <button class="btn btn-primary" id="batchGenerateBtn">✨ 批量生成二维码</button>
+                    <button class="btn" id="batchClearBtn">清空</button>
+                </div>
 
-            <div class="single-qr-wrapper">
-                <div id="singleQrcode">
-                    <div class="placeholder-text">
-                        <span>⬚</span>
-                        输入 LID 和模块ID 生成二维码
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <div id="batchResult">
+                    <div class="empty-state">
+                        <span class="big">🖼️</span>
+                        输入起始 LID 和数量，点击生成
                     </div>
                 </div>
             </div>
 
-            <div class="result-info" id="singleResultInfo" style="display: none;">
-                <div class="result-label">生成的28位编码</div>
-                <div class="result-code" id="singleGeneratedCode">—</div>
+            <!-- 单个生成 -->
+            <div class="sub-panel" id="singlePanel">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>LID <span class="badge">13位</span></label>
+                        <input type="text" id="singleLid" placeholder="6460907Q99900" maxlength="13" autocomplete="off" value="6460907Q99900">
+                    </div>
+                    <div class="input-group">
+                        <label>模块ID <span class="badge">4位</span></label>
+                        <input type="text" id="singleModuleId" placeholder="0402" maxlength="4" autocomplete="off" value="0402">
+                    </div>
+                </div>
+                <div class="error-message" id="singleError"></div>
+
+                <div class="actions">
+                    <button class="btn btn-primary" id="singleGenerateBtn">✨ 生成二维码</button>
+                    <button class="btn" id="singleClearBtn">清空</button>
+                </div>
+
+                <div class="single-qr-wrapper">
+                    <div id="singleQrcode">
+                        <div class="placeholder-text">
+                            <span>⬚</span>
+                            输入 LID 和模块ID 生成二维码
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-info" id="singleResultInfo" style="display: none;">
+                    <div class="result-label">28位编码</div>
+                    <div class="result-code" id="singleGeneratedCode">—</div>
+                    <div class="result-label" style="margin-top: 12px;">UID</div>
+                    <div class="result-code" id="singleGeneratedUid" style="color: #6b21a8; background: #faf5ff; border-color: #e9d5ff;">—</div>
+                </div>
+            </div>
+
+            <!-- 二维码规则提示 -->
+            <div class="rule-hint">
+                <strong>📐 28位二维码编码规则</strong>
+                示例：LID <code>6460907Q99900</code> + 模块ID <code>0402</code><br>
+                → 第8位 <code>Q</code> 的 ASCII = <code>0x51</code>，取后两位 <code>51</code><br>
+                → 最终：<code>6460907Q99900</code> + <code>0402</code> + <code>C8</code> + <code>51</code> + <code>99900</code> + <code>CC</code>
             </div>
         </div>
 
-        <!-- 规则提示 -->
-        <div class="rule-hint" id="ruleHint">
-            <strong>📐 编码规则</strong><br>
-            示例：LID <code>6460907Q99900</code> + 模块ID <code>0402</code><br>
-            → 第8位 <code>Q</code> 的 ASCII = <code>0x51</code>，取后两位 <code>51</code><br>
-            → 后五位 <code>99900</code><br>
-            → 最终编码：<code>6460907Q99900</code> + <code>0402</code> + <code>C8</code> + <code>51</code> + <code>99900</code> + <code>CC</code>
+        <!-- ==================================================== -->
+        <!-- ========== LID ↔ UID 互转面板 ====================== -->
+        <!-- ==================================================== -->
+        <div class="tab-panel" id="convertPanel">
+            <!-- LID → UID -->
+            <div class="convert-section">
+                <h3>🔹 LID + 模块ID → UID</h3>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>LID <span class="badge">13位</span></label>
+                        <input type="text" id="convLidInput" maxlength="13" autocomplete="off" value="5750722D00129" placeholder="例如 5750722D00129">
+                    </div>
+                    <div class="input-group">
+                        <label>模块ID <span class="badge">4位</span></label>
+                        <input type="text" id="convModuleInput" maxlength="4" autocomplete="off" value="0088" placeholder="例如 0088">
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="lidToUidBtn" style="width: 100%;">✨ 转换为 UID</button>
+                <div class="error-message" id="lidToUidError"></div>
+                <div class="convert-result-box" id="uidResultBox" style="display: none;">
+                    <div class="result-label">UID 结果</div>
+                    <div class="result-code" id="uidResult">—</div>
+                    <button class="copy-btn" id="copyUidBtn">📋 复制</button>
+                </div>
+            </div>
+
+            <hr class="convert-divider">
+
+            <!-- UID → LID -->
+            <div class="convert-section">
+                <h3>🔸 UID → LID + 模块ID</h3>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>UID <span class="badge">19位</span></label>
+                        <input type="text" id="convUidInput" maxlength="19" autocomplete="off" value="C854574722001290088" placeholder="例如 C854574722001290088">
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="uidToLidBtn" style="width: 100%;">✨ 转换为 LID 和 模块ID</button>
+                <div class="error-message" id="uidToLidError"></div>
+                <div class="convert-result-box" id="lidResultBox" style="display: none;">
+                    <div class="result-label">LID</div>
+                    <div class="result-code" id="lidResult">—</div>
+                    <div class="result-label" style="margin-top: 12px;">模块ID</div>
+                    <div class="result-code" id="moduleResult">—</div>
+                    <div class="mini-actions">
+                        <button class="mini-btn" id="copyLidBtn">📋 复制 LID</button>
+                        <button class="mini-btn" id="copyModuleBtn">📋 复制 模块ID</button>
+                    </div>
+                    <div class="mini-actions">
+                        <button class="mini-btn" id="gotoQrBtn" style="background: #2d7aff;">🔲 用此 LID 生成二维码</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 互转规则提示 -->
+            <div class="rule-hint" style="margin-top: 20px;">
+                <strong>📐 UID 编码规则</strong>
+                UID = <code>C8</code> + 年份(LID第3位) + 特诊码ASCII高4位(LID第8位) + 企业代码(LID第1-2位) + 特诊码ASCII低4位 + 3位HEX(LID第4-7位：月份转1位HEX，日为2位) + 流水号(LID后5位) + 模块ID<br>
+                <span style="color:#7c8b9c;">示例：LID <code>5750722D00129</code> + 模块ID <code>0088</code> → UID <code>C854574722001290088</code></span>
+            </div>
         </div>
 
         <div class="footer-note">
-            ⚡ 输入起始 LID + 数量，自动生成结束 LID · 点击二维码可放大
+            ⚡ 一个工具箱搞定二维码生成和编码互转 · 点击二维码可放大
         </div>
     </div>
 
@@ -815,21 +1044,27 @@
             <div class="modal-info">
                 <div class="modal-lid" id="modalLid">—</div>
                 <div class="modal-code" id="modalCode">—</div>
+                <div class="modal-uid" id="modalUid" style="display: none;">—</div>
             </div>
             <button class="modal-dl-btn" id="modalDlBtn">
-                <span>⬇</span> 下载这张二维码
+                <span>⬇</span> 保存这张二维码
             </button>
         </div>
     </div>
 
     <script>
         (function() {
-            // ========== 通用工具 ==========
+            // ==================================================
+            // 通用工具
+            // ==================================================
             function isValidLid(lid) {
                 return /^[0-9A-Za-z]{13}$/.test(lid);
             }
             function isValidModuleId(mid) {
                 return /^[0-9A-Za-z]{4}$/.test(mid);
+            }
+            function isValidUid(uid) {
+                return /^C8[0-9A-Za-z]{17}$/.test(uid);
             }
             function charToAsciiHexLastTwo(char) {
                 if (!char) return null;
@@ -842,35 +1077,154 @@
                 const asciiHexLastTwo = charToAsciiHexLastTwo(eighthChar);
                 const lastFive = lid.slice(8, 13);
                 const code = lid + moduleId + 'C8' + asciiHexLastTwo + lastFive + 'CC';
-                if (code.length !== 28) {
-                    throw new Error(`生成的编码长度为 ${code.length}，应为28位`);
-                }
+                if (code.length !== 28) throw new Error(`编码长度 ${code.length}，应为28位`);
                 return code;
             }
 
-            // ========== 模态框 ==========
+            // ========== UID 相关 ==========
+            function charToAsciiHighLow(char) {
+                const ascii = char.charCodeAt(0);
+                const hex = ascii.toString(16).toUpperCase().padStart(2, '0');
+                return { high: hex[0], low: hex[1] };
+            }
+            function asciiHighLowToChar(high, low) {
+                const code = parseInt(high + low, 16);
+                return String.fromCharCode(code);
+            }
+            function monthToHex(monthStr) {
+                const m = parseInt(monthStr, 10);
+                if (m < 1 || m > 12) throw new Error('月份必须在01-12之间');
+                return m.toString(16).toUpperCase();
+            }
+            function hexToMonth(hexChar) {
+                const m = parseInt(hexChar, 16);
+                if (m < 1 || m > 12) throw new Error('无效的月份HEX');
+                return m.toString().padStart(2, '0');
+            }
+
+            function lidToUid(lid, moduleId) {
+                if (!lid || lid.length !== 13) throw new Error('LID 必须为13位');
+                if (!isValidLid(lid)) throw new Error('LID 只能包含数字和字母');
+                if (!moduleId || moduleId.length !== 4) throw new Error('模块ID 必须为4位');
+                if (!isValidModuleId(moduleId)) throw new Error('模块ID 只能包含数字和字母');
+
+                const year = lid[2];
+                const enterprise = lid.slice(0, 2);
+                const monthStr = lid.slice(3, 5);
+                const dayStr = lid.slice(5, 7);
+                const specialChar = lid[7];
+                const serial = lid.slice(8, 13);
+
+                const { high, low } = charToAsciiHighLow(specialChar);
+                const monthHex = monthToHex(monthStr);
+                const hex3 = monthHex + dayStr;
+
+                const uid = 'C8' + year + high + enterprise + low + hex3 + serial + moduleId;
+                if (uid.length !== 19) throw new Error(`UID 长度 ${uid.length}，应为19位`);
+                return uid;
+            }
+
+            function uidToLid(uid) {
+                if (!uid || uid.length !== 19) throw new Error('UID 必须为19位');
+                if (!isValidUid(uid)) throw new Error('UID 格式错误，应以 C8 开头且为19位');
+
+                const year = uid[2];
+                const high = uid[3];
+                const enterprise = uid[4] + uid[5];
+                const low = uid[6];
+                const hex3 = uid[7] + uid[8] + uid[9];
+                const serial = uid.slice(10, 15);
+                const moduleId = uid.slice(15, 19);
+
+                const specialChar = asciiHighLowToChar(high, low);
+                const monthHex = hex3[0];
+                const dayStr = hex3.slice(1, 3);
+                const monthStr = hexToMonth(monthHex);
+
+                const lid = enterprise + year + monthStr + dayStr + specialChar + serial;
+                if (lid.length !== 13) throw new Error(`LID 长度 ${lid.length}，应为13位`);
+                return { lid, moduleId };
+            }
+
+            function safeLidToUid(lid, moduleId) {
+                try { return lidToUid(lid, moduleId); } catch (e) { return ''; }
+            }
+
+            // ==================================================
+            // 顶层标签切换
+            // ==================================================
+            const topTabs = document.querySelectorAll('.top-tab');
+            const qrPanel = document.getElementById('qrPanel');
+            const convertPanel = document.getElementById('convertPanel');
+
+            topTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    topTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    if (tab.dataset.tab === 'qr') {
+                        qrPanel.classList.add('active');
+                        convertPanel.classList.remove('active');
+                    } else {
+                        convertPanel.classList.add('active');
+                        qrPanel.classList.remove('active');
+                    }
+                });
+            });
+
+            // ==================================================
+            // 子标签切换
+            // ==================================================
+            const subTabs = document.querySelectorAll('.sub-tab');
+            const batchPanel = document.getElementById('batchPanel');
+            const singlePanel = document.getElementById('singlePanel');
+
+            subTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    subTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    if (tab.dataset.sub === 'batch') {
+                        batchPanel.classList.add('active');
+                        singlePanel.classList.remove('active');
+                    } else {
+                        singlePanel.classList.add('active');
+                        batchPanel.classList.remove('active');
+                    }
+                });
+            });
+
+            // ==================================================
+            // 模态框
+            // ==================================================
             const modalOverlay = document.getElementById('modalOverlay');
             const modalQr = document.getElementById('modalQr');
             const modalLid = document.getElementById('modalLid');
             const modalCode = document.getElementById('modalCode');
+            const modalUid = document.getElementById('modalUid');
             const modalClose = document.getElementById('modalClose');
             const modalDlBtn = document.getElementById('modalDlBtn');
             let modalCurrentLid = '';
             let modalCurrentModuleId = '';
 
-            function openModal(lid, moduleId, fullCode, sourceImgWrap) {
+            function openModal(lid, moduleId, fullCode) {
                 modalLid.textContent = lid;
                 modalCode.textContent = fullCode;
                 modalCurrentLid = lid;
                 modalCurrentModuleId = moduleId;
 
-                // 清空并生成大二维码
+                const uid = safeLidToUid(lid, moduleId);
+                if (uid) {
+                    modalUid.textContent = uid;
+                    modalUid.style.display = 'block';
+                } else {
+                    modalUid.style.display = 'none';
+                }
+
                 modalQr.innerHTML = '';
                 try {
                     new QRCode(modalQr, {
                         text: fullCode,
-                        width: 320,
-                        height: 320,
+                        width: 280,
+                        height: 280,
                         colorDark: '#0b1b2f',
                         colorLight: '#ffffff',
                         correctLevel: QRCode.CorrectLevel.H
@@ -883,22 +1237,17 @@
                 modalOverlay.classList.add('show');
                 document.body.style.overflow = 'hidden';
             }
-
             function closeModal() {
                 modalOverlay.classList.remove('show');
                 document.body.style.overflow = '';
             }
-
             modalClose.addEventListener('click', closeModal);
             modalOverlay.addEventListener('click', (e) => {
                 if (e.target === modalOverlay) closeModal();
             });
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && modalOverlay.classList.contains('show')) {
-                    closeModal();
-                }
+                if (e.key === 'Escape' && modalOverlay.classList.contains('show')) closeModal();
             });
-
             modalDlBtn.addEventListener('click', () => {
                 const canvas = modalQr.querySelector('canvas');
                 const img = modalQr.querySelector('img');
@@ -913,29 +1262,9 @@
                 }
             });
 
-            // ========== 模式切换 ==========
-            const modeBtns = document.querySelectorAll('.mode-btn');
-            const batchPanel = document.getElementById('batchPanel');
-            const singlePanel = document.getElementById('singlePanel');
-
-            modeBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    modeBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    const mode = btn.dataset.mode;
-                    if (mode === 'batch') {
-                        batchPanel.classList.add('active');
-                        singlePanel.classList.remove('active');
-                    } else {
-                        singlePanel.classList.add('active');
-                        batchPanel.classList.remove('active');
-                    }
-                });
-            });
-
-            // ============================================================
-            // ========== 批量模式 ========================================
-            // ============================================================
+            // ==================================================
+            // 批量模式
+            // ==================================================
             const batchLidStart = document.getElementById('batchLidStart');
             const batchCount = document.getElementById('batchCount');
             const batchLidEnd = document.getElementById('batchLidEnd');
@@ -948,19 +1277,16 @@
             const progressFill = document.getElementById('progressFill');
             const rangeHint = document.getElementById('rangeHint');
 
-            // 根据起始 LID 和数量计算结束 LID
             function computeEndLid(start, count) {
                 if (start.length !== 13) return null;
                 if (!isValidLid(start)) return null;
                 if (count < 1) return null;
-                // 最后两位必须是数字
                 const last2 = start.slice(11);
                 if (!/^[0-9]{2}$/.test(last2)) return null;
                 const startNum = parseInt(last2, 10);
                 const endNum = startNum + count - 1;
-                if (endNum > 99) return null; // 超出两位范围
-                const prefix = start.slice(0, 11);
-                return prefix + endNum.toString().padStart(2, '0');
+                if (endNum > 99) return null;
+                return start.slice(0, 11) + endNum.toString().padStart(2, '0');
             }
 
             function updateRangeHint() {
@@ -1012,20 +1338,19 @@
                 const endNum = startNum + count - 1;
                 if (endNum > 99) {
                     rangeHint.className = 'range-hint error';
-                    rangeHint.innerHTML = `⚠️ 从 ${start} 开始 ${count} 个会超出99，请减少数量或调整起始值`;
+                    rangeHint.innerHTML = `⚠️ 从 ${start} 开始 ${count} 个会超出99，请减少数量`;
                     batchLidEnd.value = '';
                     return;
                 }
                 const endLid = computeEndLid(start, count);
                 batchLidEnd.value = endLid;
                 rangeHint.className = 'range-hint ok';
-                rangeHint.innerHTML = `✅ 将生成 <strong>${count}</strong> 个二维码 · LID 范围 <code>${start}</code> → <code>${endLid}</code>`;
+                rangeHint.innerHTML = `✅ 将生成 <strong>${count}</strong> 个 · <code>${start}</code> → <code>${endLid}</code>`;
             }
 
             batchLidStart.addEventListener('input', updateRangeHint);
             batchCount.addEventListener('input', updateRangeHint);
 
-            // 创建一行二维码卡片
             function createQrRow(lid, moduleId, index) {
                 const row = document.createElement('div');
                 row.className = 'qr-row';
@@ -1037,7 +1362,7 @@
                 const dlBtn = document.createElement('div');
                 dlBtn.className = 'dl-btn';
                 dlBtn.innerHTML = '⬇';
-                dlBtn.title = '下载此二维码';
+                dlBtn.title = '保存此二维码';
                 dlBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const canvas = row.querySelector('canvas');
@@ -1071,35 +1396,38 @@
                 infoTop.appendChild(lidLabel);
 
                 let fullCode = '';
-                try {
-                    fullCode = generate28Code(lid, moduleId);
-                } catch (e) {
-                    fullCode = '编码错误';
-                }
+                try { fullCode = generate28Code(lid, moduleId); } catch (e) { fullCode = '编码错误'; }
+                const uid = safeLidToUid(lid, moduleId);
 
-                const infoLine = document.createElement('div');
-                infoLine.className = 'info-line';
-                infoLine.innerHTML = `
-                    <div class="info-label">完整28位编码</div>
+                const codeLine = document.createElement('div');
+                codeLine.className = 'info-line';
+                codeLine.innerHTML = `
+                    <div class="info-label">28位编码</div>
                     <div class="code-full">${fullCode}</div>
                 `;
-
                 info.appendChild(infoTop);
-                info.appendChild(infoLine);
+                info.appendChild(codeLine);
+
+                if (uid) {
+                    const uidLine = document.createElement('div');
+                    uidLine.className = 'info-line';
+                    uidLine.innerHTML = `
+                        <div class="info-label">UID</div>
+                        <div class="code-uid">${uid}</div>
+                    `;
+                    info.appendChild(uidLine);
+                }
 
                 row.appendChild(imgWrap);
                 row.appendChild(info);
                 row.appendChild(dlBtn);
 
-                // 点击图片放大
                 imgWrap.addEventListener('click', () => {
-                    openModal(lid, moduleId, fullCode, imgWrap);
+                    openModal(lid, moduleId, fullCode);
                 });
 
                 row._qrImgWrap = imgWrap;
                 row._fullCode = fullCode;
-                row._lid = lid;
-                row._moduleId = moduleId;
 
                 return row;
             }
@@ -1114,62 +1442,20 @@
                 const count = parseInt(batchCount.value, 10);
                 const moduleId = batchModuleId.value.trim();
 
-                if (!start) {
-                    batchError.textContent = 'LID 起始不能为空';
-                    batchLidStart.classList.add('error');
-                    return;
-                }
-                if (start.length !== 13) {
-                    batchError.textContent = `LID 起始必须为13位，当前${start.length}位`;
-                    batchLidStart.classList.add('error');
-                    return;
-                }
-                if (!isValidLid(start)) {
-                    batchError.textContent = 'LID 只能包含数字和字母';
-                    batchLidStart.classList.add('error');
-                    return;
-                }
+                if (!start) { batchError.textContent = 'LID 起始不能为空'; batchLidStart.classList.add('error'); return; }
+                if (start.length !== 13) { batchError.textContent = `LID 起始必须为13位，当前${start.length}位`; batchLidStart.classList.add('error'); return; }
+                if (!isValidLid(start)) { batchError.textContent = 'LID 只能包含数字和字母'; batchLidStart.classList.add('error'); return; }
                 const last2 = start.slice(11);
-                if (!/^[0-9]{2}$/.test(last2)) {
-                    batchError.textContent = 'LID 最后两位必须是数字 (00-99)';
-                    batchLidStart.classList.add('error');
-                    return;
-                }
-                if (!count || count < 1) {
-                    batchError.textContent = '数量必须 ≥ 1';
-                    batchCount.classList.add('error');
-                    return;
-                }
-                if (count > 100) {
-                    batchError.textContent = '数量最多 100 个';
-                    batchCount.classList.add('error');
-                    return;
-                }
+                if (!/^[0-9]{2}$/.test(last2)) { batchError.textContent = 'LID 最后两位必须是数字 (00-99)'; batchLidStart.classList.add('error'); return; }
+                if (!count || count < 1) { batchError.textContent = '数量必须 ≥ 1'; batchCount.classList.add('error'); return; }
+                if (count > 100) { batchError.textContent = '数量最多 100 个'; batchCount.classList.add('error'); return; }
                 const startNum = parseInt(last2, 10);
                 const endNum = startNum + count - 1;
-                if (endNum > 99) {
-                    batchError.textContent = `从该起始值开始 ${count} 个会超出99，请减少数量`;
-                    batchCount.classList.add('error');
-                    return;
-                }
+                if (endNum > 99) { batchError.textContent = `从该起始值开始 ${count} 个会超出99，请减少数量`; batchCount.classList.add('error'); return; }
+                if (!moduleId) { batchError.textContent = '模块ID 不能为空'; batchModuleId.classList.add('error'); return; }
+                if (moduleId.length !== 4) { batchError.textContent = `模块ID 必须为4位，当前${moduleId.length}位`; batchModuleId.classList.add('error'); return; }
+                if (!isValidModuleId(moduleId)) { batchError.textContent = '模块ID 只能包含数字和字母'; batchModuleId.classList.add('error'); return; }
 
-                if (!moduleId) {
-                    batchError.textContent = '模块ID 不能为空';
-                    batchModuleId.classList.add('error');
-                    return;
-                }
-                if (moduleId.length !== 4) {
-                    batchError.textContent = `模块ID 必须为4位，当前${moduleId.length}位`;
-                    batchModuleId.classList.add('error');
-                    return;
-                }
-                if (!isValidModuleId(moduleId)) {
-                    batchError.textContent = '模块ID 只能包含数字和字母';
-                    batchModuleId.classList.add('error');
-                    return;
-                }
-
-                // 构建 LID 列表
                 const prefix = start.slice(0, 11);
                 const lidList = [];
                 for (let i = startNum; i <= endNum; i++) {
@@ -1178,15 +1464,12 @@
 
                 progressBar.classList.add('active');
                 progressFill.style.width = '0%';
-
                 batchResult.innerHTML = '';
 
                 const header = document.createElement('div');
                 header.className = 'batch-header';
                 header.innerHTML = `
-                    <div class="batch-title">
-                        <span>📋</span> 生成结果
-                    </div>
+                    <div class="batch-title"><span>📋</span> 生成结果</div>
                     <div class="batch-count">共 ${lidList.length} 个</div>
                 `;
                 batchResult.appendChild(header);
@@ -1207,7 +1490,6 @@
                         }, 800);
                         return;
                     }
-
                     const lid = lidList[i];
                     const row = createQrRow(lid, moduleId, i);
                     list.appendChild(row);
@@ -1215,8 +1497,8 @@
                     try {
                         new QRCode(row._qrImgWrap, {
                             text: row._fullCode,
-                            width: 180,
-                            height: 180,
+                            width: 170,
+                            height: 170,
                             colorDark: '#0b1b2f',
                             colorLight: '#ffffff',
                             correctLevel: QRCode.CorrectLevel.H
@@ -1230,12 +1512,10 @@
                     progressFill.style.width = Math.round((i / total) * 100) + '%';
                     setTimeout(processNext, 20);
                 }
-
                 processNext();
             }
 
             batchGenerateBtn.addEventListener('click', batchGenerate);
-
             batchClearBtn.addEventListener('click', () => {
                 batchLidStart.value = '';
                 batchCount.value = '10';
@@ -1252,14 +1532,14 @@
                     </div>
                 `;
                 rangeHint.className = 'range-hint';
-                rangeHint.innerHTML = '💡 输入起始 LID 和数量，自动计算结束 LID（最后两位数字递增）';
+                rangeHint.innerHTML = '💡 输入起始 LID 和数量，自动计算结束 LID';
             });
 
             updateRangeHint();
 
-            // ============================================================
-            // ========== 单个模式 ========================================
-            // ============================================================
+            // ==================================================
+            // 单个模式
+            // ==================================================
             const singleLid = document.getElementById('singleLid');
             const singleModuleId = document.getElementById('singleModuleId');
             const singleGenerateBtn = document.getElementById('singleGenerateBtn');
@@ -1268,15 +1548,13 @@
             const singleQrcode = document.getElementById('singleQrcode');
             const singleResultInfo = document.getElementById('singleResultInfo');
             const singleGeneratedCode = document.getElementById('singleGeneratedCode');
+            const singleGeneratedUid = document.getElementById('singleGeneratedUid');
 
             let singleQrcodeInstance = null;
             let singleCurrentCode = '';
 
             function singleResetQRCode() {
-                if (singleQrcodeInstance) {
-                    singleQrcodeInstance.clear();
-                    singleQrcodeInstance = null;
-                }
+                if (singleQrcodeInstance) { singleQrcodeInstance.clear(); singleQrcodeInstance = null; }
                 singleQrcode.innerHTML = `
                     <div class="placeholder-text">
                         <span>⬚</span>
@@ -1285,6 +1563,7 @@
                 `;
                 singleResultInfo.style.display = 'none';
                 singleGeneratedCode.textContent = '—';
+                singleGeneratedUid.textContent = '—';
                 singleCurrentCode = '';
             }
 
@@ -1296,57 +1575,18 @@
                 const lid = singleLid.value.trim();
                 const moduleId = singleModuleId.value.trim();
 
-                if (!lid) {
-                    singleError.textContent = 'LID 不能为空';
-                    singleLid.classList.add('error');
-                    singleResetQRCode();
-                    return;
-                }
-                if (lid.length !== 13) {
-                    singleError.textContent = `LID 必须为13位，当前${lid.length}位`;
-                    singleLid.classList.add('error');
-                    singleResetQRCode();
-                    return;
-                }
-                if (!isValidLid(lid)) {
-                    singleError.textContent = 'LID 只能包含数字和字母';
-                    singleLid.classList.add('error');
-                    singleResetQRCode();
-                    return;
-                }
-                if (!moduleId) {
-                    singleError.textContent = '模块ID 不能为空';
-                    singleModuleId.classList.add('error');
-                    singleResetQRCode();
-                    return;
-                }
-                if (moduleId.length !== 4) {
-                    singleError.textContent = `模块ID 必须为4位，当前${moduleId.length}位`;
-                    singleModuleId.classList.add('error');
-                    singleResetQRCode();
-                    return;
-                }
-                if (!isValidModuleId(moduleId)) {
-                    singleError.textContent = '模块ID 只能包含数字和字母';
-                    singleModuleId.classList.add('error');
-                    singleResetQRCode();
-                    return;
-                }
+                if (!lid) { singleError.textContent = 'LID 不能为空'; singleLid.classList.add('error'); singleResetQRCode(); return; }
+                if (lid.length !== 13) { singleError.textContent = `LID 必须为13位，当前${lid.length}位`; singleLid.classList.add('error'); singleResetQRCode(); return; }
+                if (!isValidLid(lid)) { singleError.textContent = 'LID 只能包含数字和字母'; singleLid.classList.add('error'); singleResetQRCode(); return; }
+                if (!moduleId) { singleError.textContent = '模块ID 不能为空'; singleModuleId.classList.add('error'); singleResetQRCode(); return; }
+                if (moduleId.length !== 4) { singleError.textContent = `模块ID 必须为4位，当前${moduleId.length}位`; singleModuleId.classList.add('error'); singleResetQRCode(); return; }
+                if (!isValidModuleId(moduleId)) { singleError.textContent = '模块ID 只能包含数字和字母'; singleModuleId.classList.add('error'); singleResetQRCode(); return; }
 
                 let fullCode;
-                try {
-                    fullCode = generate28Code(lid, moduleId);
-                } catch (e) {
-                    singleError.textContent = e.message;
-                    singleLid.classList.add('error');
-                    singleResetQRCode();
-                    return;
-                }
+                try { fullCode = generate28Code(lid, moduleId); }
+                catch (e) { singleError.textContent = e.message; singleLid.classList.add('error'); singleResetQRCode(); return; }
 
-                if (singleQrcodeInstance) {
-                    singleQrcodeInstance.clear();
-                    singleQrcodeInstance = null;
-                }
+                if (singleQrcodeInstance) { singleQrcodeInstance.clear(); singleQrcodeInstance = null; }
                 singleQrcode.innerHTML = '';
 
                 try {
@@ -1364,12 +1604,13 @@
                 }
 
                 singleGeneratedCode.textContent = fullCode;
+                const uid = safeLidToUid(lid, moduleId);
+                singleGeneratedUid.textContent = uid || '（无法生成UID，请检查LID格式）';
                 singleResultInfo.style.display = 'block';
                 singleCurrentCode = fullCode;
             }
 
             singleGenerateBtn.addEventListener('click', singleGenerate);
-
             singleClearBtn.addEventListener('click', () => {
                 singleLid.value = '';
                 singleModuleId.value = '';
@@ -1379,17 +1620,11 @@
                 singleResetQRCode();
                 singleLid.focus();
             });
-
             [singleLid, singleModuleId].forEach(el => {
                 el.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        singleGenerate();
-                    }
+                    if (e.key === 'Enter') { e.preventDefault(); singleGenerate(); }
                 });
             });
-
-            // 单个二维码点击放大
             singleQrcode.addEventListener('click', () => {
                 if (!singleCurrentCode) return;
                 const lid = singleLid.value.trim();
@@ -1397,16 +1632,123 @@
                 openModal(lid, moduleId, singleCurrentCode);
             });
 
-            // 页面加载后自动批量生成默认值
+            // ==================================================
+            // 互转面板
+            // ==================================================
+            const convLidInput = document.getElementById('convLidInput');
+            const convModuleInput = document.getElementById('convModuleInput');
+            const lidToUidBtn = document.getElementById('lidToUidBtn');
+            const lidToUidError = document.getElementById('lidToUidError');
+            const uidResultBox = document.getElementById('uidResultBox');
+            const uidResult = document.getElementById('uidResult');
+            const copyUidBtn = document.getElementById('copyUidBtn');
+
+            const convUidInput = document.getElementById('convUidInput');
+            const uidToLidBtn = document.getElementById('uidToLidBtn');
+            const uidToLidError = document.getElementById('uidToLidError');
+            const lidResultBox = document.getElementById('lidResultBox');
+            const lidResult = document.getElementById('lidResult');
+            const moduleResult = document.getElementById('moduleResult');
+            const copyLidBtn = document.getElementById('copyLidBtn');
+            const copyModuleBtn = document.getElementById('copyModuleBtn');
+            const gotoQrBtn = document.getElementById('gotoQrBtn');
+
+            function copyText(text, btn, defaultText) {
+                if (!text) return;
+                navigator.clipboard.writeText(text).then(() => {
+                    btn.textContent = '✅ 已复制';
+                    setTimeout(() => { btn.textContent = defaultText; }, 1500);
+                }).catch(() => {
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    try { document.execCommand('copy'); btn.textContent = '✅ 已复制'; } catch (e) {}
+                    document.body.removeChild(ta);
+                    setTimeout(() => { btn.textContent = defaultText; }, 1500);
+                });
+            }
+
+            lidToUidBtn.addEventListener('click', function() {
+                lidToUidError.textContent = '';
+                convLidInput.classList.remove('error');
+                convModuleInput.classList.remove('error');
+                uidResultBox.style.display = 'none';
+                const lid = convLidInput.value.trim();
+                const moduleId = convModuleInput.value.trim();
+                try {
+                    const uid = lidToUid(lid, moduleId);
+                    uidResult.textContent = uid;
+                    uidResultBox.style.display = 'block';
+                } catch (e) {
+                    lidToUidError.textContent = '⚠️ ' + e.message;
+                    if (e.message.includes('LID')) convLidInput.classList.add('error');
+                    if (e.message.includes('模块ID')) convModuleInput.classList.add('error');
+                }
+            });
+
+            uidToLidBtn.addEventListener('click', function() {
+                uidToLidError.textContent = '';
+                convUidInput.classList.remove('error');
+                lidResultBox.style.display = 'none';
+                const uid = convUidInput.value.trim();
+                try {
+                    const result = uidToLid(uid);
+                    lidResult.textContent = result.lid;
+                    moduleResult.textContent = result.moduleId;
+                    lidResultBox.style.display = 'block';
+                } catch (e) {
+                    uidToLidError.textContent = '⚠️ ' + e.message;
+                    convUidInput.classList.add('error');
+                }
+            });
+
+            copyUidBtn.addEventListener('click', function() { copyText(uidResult.textContent, copyUidBtn, '📋 复制'); });
+            copyLidBtn.addEventListener('click', function() { copyText(lidResult.textContent, copyLidBtn, '📋 复制 LID'); });
+            copyModuleBtn.addEventListener('click', function() { copyText(moduleResult.textContent, copyModuleBtn, '📋 复制 模块ID'); });
+
+            gotoQrBtn.addEventListener('click', function() {
+                const lid = lidResult.textContent;
+                const moduleId = moduleResult.textContent;
+                if (!lid || !moduleId) return;
+
+                singleLid.value = lid;
+                singleModuleId.value = moduleId;
+
+                topTabs.forEach(t => t.classList.remove('active'));
+                document.querySelector('.top-tab[data-tab="qr"]').classList.add('active');
+                qrPanel.classList.add('active');
+                convertPanel.classList.remove('active');
+
+                subTabs.forEach(t => t.classList.remove('active'));
+                document.querySelector('.sub-tab[data-sub="single"]').classList.add('active');
+                singlePanel.classList.add('active');
+                batchPanel.classList.remove('active');
+
+                setTimeout(() => { singleGenerate(); }, 100);
+            });
+
+            [convLidInput, convModuleInput, convUidInput].forEach(el => {
+                el.addEventListener('input', function() {
+                    this.classList.remove('error');
+                    if (this === convLidInput || this === convModuleInput) {
+                        lidToUidError.textContent = '';
+                    } else {
+                        uidToLidError.textContent = '';
+                    }
+                });
+            });
+
+            // ==================================================
+            // 初始化
+            // ==================================================
             window.addEventListener('load', function() {
-                setTimeout(() => {
+                setTimeout(function() {
                     try {
                         const start = batchLidStart.value.trim();
                         const count = parseInt(batchCount.value, 10);
                         const moduleId = batchModuleId.value.trim();
-                        if (start && count && moduleId) {
-                            batchGenerate();
-                        }
+                        if (start && count && moduleId) batchGenerate();
                     } catch (e) {}
                 }, 300);
             });
