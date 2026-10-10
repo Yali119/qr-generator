@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>二维码工具箱 · 生成 + 互转</title>
+    <title>二维码工具箱 · 28位 + 17位 + 互转</title>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script>
         if (typeof QRCode === 'undefined') {
@@ -89,10 +89,10 @@
             flex: 1;
             border: none;
             background: transparent;
-            padding: 14px 12px;
+            padding: 13px 6px;
             border-radius: 36px;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             cursor: pointer;
             color: #4f6f8f;
             transition: 0.2s;
@@ -100,9 +100,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 4px;
             -webkit-appearance: none;
             appearance: none;
+            white-space: nowrap;
         }
         .top-tab.active {
             background: white;
@@ -185,7 +186,7 @@
             font-weight: 400;
             letter-spacing: 0.3px;
         }
-        input {
+        input, select {
             padding: 14px 14px;
             border-radius: 16px;
             border: 1.5px solid #d0dae6;
@@ -197,7 +198,7 @@
             -webkit-appearance: none;
             appearance: none;
         }
-        input:focus {
+        input:focus, select:focus {
             border-color: #2d7aff;
             outline: none;
             box-shadow: 0 0 0 4px rgba(45, 122, 255, 0.15);
@@ -843,6 +844,10 @@
             .modal-content {
                 padding: 24px 16px;
             }
+            .top-tab {
+                font-size: 0.78rem;
+                padding: 12px 4px;
+            }
         }
     </style>
 </head>
@@ -853,24 +858,26 @@
             <h1>二维码工具箱</h1>
         </div>
         <div class="subhead">
-            二维码生成 + LID ↔ UID 互转 · 一站式工具
+            28位 / 17位二维码生成 + LID ↔ UID 互转 · 一站式工具
         </div>
 
         <!-- ===== 顶层标签 ===== -->
         <div class="top-tabs">
             <button class="top-tab active" data-tab="qr">
-                <span>🔲</span> 二维码生成
+                <span>🔲</span> 28位
+            </button>
+            <button class="top-tab" data-tab="qr17">
+                <span>🔳</span> 17位
             </button>
             <button class="top-tab" data-tab="convert">
-                <span>🔄</span> LID ↔ UID 互转
+                <span>🔄</span> 互转
             </button>
         </div>
 
         <!-- ==================================================== -->
-        <!-- ========== 二维码生成面板 =========================== -->
+        <!-- ========== 28位二维码面板 =========================== -->
         <!-- ==================================================== -->
         <div class="tab-panel active" id="qrPanel">
-            <!-- 子标签 -->
             <div class="sub-tabs">
                 <button class="sub-tab active" data-sub="batch">
                     <span>📦</span> 批量生成
@@ -880,7 +887,7 @@
                 </button>
             </div>
 
-            <!-- 批量生成 -->
+            <!-- 28位批量 -->
             <div class="sub-panel active" id="batchPanel">
                 <div class="input-row">
                     <div class="input-group">
@@ -906,16 +913,13 @@
                     💡 输入起始 LID 和数量，自动计算结束 LID
                 </div>
                 <div class="error-message" id="batchError"></div>
-
                 <div class="actions">
                     <button class="btn btn-primary" id="batchGenerateBtn">✨ 批量生成二维码</button>
                     <button class="btn" id="batchClearBtn">清空</button>
                 </div>
-
                 <div class="progress-bar" id="progressBar">
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
-
                 <div id="batchResult">
                     <div class="empty-state">
                         <span class="big">🖼️</span>
@@ -924,7 +928,7 @@
                 </div>
             </div>
 
-            <!-- 单个生成 -->
+            <!-- 28位单个 -->
             <div class="sub-panel" id="singlePanel">
                 <div class="input-row">
                     <div class="input-group">
@@ -937,12 +941,10 @@
                     </div>
                 </div>
                 <div class="error-message" id="singleError"></div>
-
                 <div class="actions">
                     <button class="btn btn-primary" id="singleGenerateBtn">✨ 生成二维码</button>
                     <button class="btn" id="singleClearBtn">清空</button>
                 </div>
-
                 <div class="single-qr-wrapper">
                     <div id="singleQrcode">
                         <div class="placeholder-text">
@@ -951,7 +953,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="result-info" id="singleResultInfo" style="display: none;">
                     <div class="result-label">28位编码</div>
                     <div class="result-code" id="singleGeneratedCode">—</div>
@@ -960,7 +961,6 @@
                 </div>
             </div>
 
-            <!-- 二维码规则提示 -->
             <div class="rule-hint">
                 <strong>📐 28位二维码编码规则</strong>
                 示例：LID <code>6460907Q99900</code> + 模块ID <code>0402</code><br>
@@ -970,10 +970,111 @@
         </div>
 
         <!-- ==================================================== -->
+        <!-- ========== 17位二维码面板 =========================== -->
+        <!-- ==================================================== -->
+        <div class="tab-panel" id="qr17Panel">
+            <div class="sub-tabs">
+                <button class="sub-tab active" data-sub17="new">
+                    <span>🆕</span> 新17位
+                </button>
+                <button class="sub-tab" data-sub17="old">
+                    <span>📜</span> 旧17位
+                </button>
+            </div>
+
+            <!-- ===== 新17位：13位LID + 4位模块ID ===== -->
+            <div class="sub-panel active" id="qr17NewPanel">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>LID 起始 <span class="badge">13位</span></label>
+                        <input type="text" id="qr17NewLidStart" placeholder="6160907Q99900" maxlength="13" autocomplete="off" value="6160907Q99900">
+                    </div>
+                    <div class="input-group narrow">
+                        <label>数量 <span class="badge">1-100</span></label>
+                        <input type="number" id="qr17NewCount" placeholder="10" min="1" max="100" autocomplete="off" value="10">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>LID 结束 <span class="badge">自动计算</span></label>
+                        <input type="text" id="qr17NewLidEnd" placeholder="自动计算" readonly>
+                    </div>
+                    <div class="input-group">
+                        <label>模块ID <span class="badge">4位</span></label>
+                        <input type="text" id="qr17NewModuleId" placeholder="0402" maxlength="4" autocomplete="off" value="0402">
+                    </div>
+                </div>
+                <div class="range-hint" id="qr17NewHint">
+                    💡 新17位 = 13位LID + 4位模块ID，LID最后两位递增
+                </div>
+                <div class="error-message" id="qr17NewError"></div>
+                <div class="actions">
+                    <button class="btn btn-primary" id="qr17NewGenerateBtn">✨ 批量生成新17位</button>
+                    <button class="btn" id="qr17NewClearBtn">清空</button>
+                </div>
+                <div class="progress-bar" id="qr17NewProgressBar">
+                    <div class="progress-fill" id="qr17NewProgressFill"></div>
+                </div>
+                <div id="qr17NewResult">
+                    <div class="empty-state">
+                        <span class="big">🔳</span>
+                        输入起始 LID 和数量，点击生成
+                    </div>
+                </div>
+                <div class="rule-hint">
+                    <strong>📐 新17位编码规则</strong>
+                    示例：LID <code>6160907Q99900</code> + 模块ID <code>0402</code><br>
+                    → 最终：<code>6160907Q99900</code> + <code>0402</code> = <code>6160907Q999000402</code>（17位）
+                </div>
+            </div>
+
+            <!-- ===== 旧17位：13位LID + 24 + LID最后两位 ===== -->
+            <div class="sub-panel" id="qr17OldPanel">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>LID 起始 <span class="badge">13位</span></label>
+                        <input type="text" id="qr17OldLidStart" placeholder="6160907Q99900" maxlength="13" autocomplete="off" value="6160907Q99900">
+                    </div>
+                    <div class="input-group narrow">
+                        <label>数量 <span class="badge">1-100</span></label>
+                        <input type="number" id="qr17OldCount" placeholder="10" min="1" max="100" autocomplete="off" value="10">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>LID 结束 <span class="badge">自动计算</span></label>
+                        <input type="text" id="qr17OldLidEnd" placeholder="自动计算" readonly>
+                    </div>
+                </div>
+                <div class="range-hint" id="qr17OldHint">
+                    💡 旧17位 = 13位LID + 24 + LID最后两位
+                </div>
+                <div class="error-message" id="qr17OldError"></div>
+                <div class="actions">
+                    <button class="btn btn-primary" id="qr17OldGenerateBtn">✨ 批量生成旧17位</button>
+                    <button class="btn" id="qr17OldClearBtn">清空</button>
+                </div>
+                <div class="progress-bar" id="qr17OldProgressBar">
+                    <div class="progress-fill" id="qr17OldProgressFill"></div>
+                </div>
+                <div id="qr17OldResult">
+                    <div class="empty-state">
+                        <span class="big">📜</span>
+                        输入起始 LID 和数量，点击生成
+                    </div>
+                </div>
+                <div class="rule-hint">
+                    <strong>📐 旧17位编码规则</strong>
+                    示例：LID <code>6160907Q99900</code>，其最后两位为 <code>00</code><br>
+                    → 最终：<code>6160907Q99900</code> + <code>24</code> + <code>00</code> = <code>6160907Q999002400</code>（17位）
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================================================== -->
         <!-- ========== LID ↔ UID 互转面板 ====================== -->
         <!-- ==================================================== -->
         <div class="tab-panel" id="convertPanel">
-            <!-- LID → UID -->
             <div class="convert-section">
                 <h3>🔹 LID + 模块ID → UID</h3>
                 <div class="input-row">
@@ -997,7 +1098,6 @@
 
             <hr class="convert-divider">
 
-            <!-- UID → LID -->
             <div class="convert-section">
                 <h3>🔸 UID → LID + 模块ID</h3>
                 <div class="input-row">
@@ -1018,12 +1118,11 @@
                         <button class="mini-btn" id="copyModuleBtn">📋 复制 模块ID</button>
                     </div>
                     <div class="mini-actions">
-                        <button class="mini-btn" id="gotoQrBtn" style="background: #2d7aff;">🔲 用此 LID 生成二维码</button>
+                        <button class="mini-btn" id="gotoQrBtn" style="background: #2d7aff;">🔲 用此 LID 生成28位二维码</button>
                     </div>
                 </div>
             </div>
 
-            <!-- 互转规则提示 -->
             <div class="rule-hint" style="margin-top: 20px;">
                 <strong>📐 UID 编码规则</strong>
                 UID = <code>C8</code> + 年份(LID第3位) + 特诊码ASCII高4位(LID第8位) + 企业代码(LID第1-2位) + 特诊码ASCII低4位 + 3位HEX(LID第4-7位：月份转1位HEX，日为2位) + 流水号(LID后5位) + 模块ID<br>
@@ -1032,7 +1131,7 @@
         </div>
 
         <div class="footer-note">
-            ⚡ 一个工具箱搞定二维码生成和编码互转 · 点击二维码可放大
+            ⚡ 28位 / 17位二维码生成 · LID ↔ UID 互转 · 点击二维码可放大
         </div>
     </div>
 
@@ -1080,6 +1179,19 @@
                 if (code.length !== 28) throw new Error(`编码长度 ${code.length}，应为28位`);
                 return code;
             }
+            // 新17位：13位LID + 4位模块ID
+            function generate17NewCode(lid, moduleId) {
+                const code = lid + moduleId;
+                if (code.length !== 17) throw new Error(`新17位长度 ${code.length}，应为17位`);
+                return code;
+            }
+            // 旧17位：13位LID + 24 + LID最后两位
+            function generate17OldCode(lid) {
+                const xxFromLid = lid.slice(11); // LID 最后两位
+                const code = lid + '24' + xxFromLid;
+                if (code.length !== 17) throw new Error(`旧17位长度 ${code.length}，应为17位`);
+                return code;
+            }
 
             // ========== UID 相关 ==========
             function charToAsciiHighLow(char) {
@@ -1101,33 +1213,27 @@
                 if (m < 1 || m > 12) throw new Error('无效的月份HEX');
                 return m.toString().padStart(2, '0');
             }
-
             function lidToUid(lid, moduleId) {
                 if (!lid || lid.length !== 13) throw new Error('LID 必须为13位');
                 if (!isValidLid(lid)) throw new Error('LID 只能包含数字和字母');
                 if (!moduleId || moduleId.length !== 4) throw new Error('模块ID 必须为4位');
                 if (!isValidModuleId(moduleId)) throw new Error('模块ID 只能包含数字和字母');
-
                 const year = lid[2];
                 const enterprise = lid.slice(0, 2);
                 const monthStr = lid.slice(3, 5);
                 const dayStr = lid.slice(5, 7);
                 const specialChar = lid[7];
                 const serial = lid.slice(8, 13);
-
                 const { high, low } = charToAsciiHighLow(specialChar);
                 const monthHex = monthToHex(monthStr);
                 const hex3 = monthHex + dayStr;
-
                 const uid = 'C8' + year + high + enterprise + low + hex3 + serial + moduleId;
                 if (uid.length !== 19) throw new Error(`UID 长度 ${uid.length}，应为19位`);
                 return uid;
             }
-
             function uidToLid(uid) {
                 if (!uid || uid.length !== 19) throw new Error('UID 必须为19位');
                 if (!isValidUid(uid)) throw new Error('UID 格式错误，应以 C8 开头且为19位');
-
                 const year = uid[2];
                 const high = uid[3];
                 const enterprise = uid[4] + uid[5];
@@ -1135,17 +1241,14 @@
                 const hex3 = uid[7] + uid[8] + uid[9];
                 const serial = uid.slice(10, 15);
                 const moduleId = uid.slice(15, 19);
-
                 const specialChar = asciiHighLowToChar(high, low);
                 const monthHex = hex3[0];
                 const dayStr = hex3.slice(1, 3);
                 const monthStr = hexToMonth(monthHex);
-
                 const lid = enterprise + year + monthStr + dayStr + specialChar + serial;
                 if (lid.length !== 13) throw new Error(`LID 长度 ${lid.length}，应为13位`);
                 return { lid, moduleId };
             }
-
             function safeLidToUid(lid, moduleId) {
                 try { return lidToUid(lid, moduleId); } catch (e) { return ''; }
             }
@@ -1155,32 +1258,35 @@
             // ==================================================
             const topTabs = document.querySelectorAll('.top-tab');
             const qrPanel = document.getElementById('qrPanel');
+            const qr17Panel = document.getElementById('qr17Panel');
             const convertPanel = document.getElementById('convertPanel');
 
             topTabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     topTabs.forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
+                    qrPanel.classList.remove('active');
+                    qr17Panel.classList.remove('active');
+                    convertPanel.classList.remove('active');
                     if (tab.dataset.tab === 'qr') {
                         qrPanel.classList.add('active');
-                        convertPanel.classList.remove('active');
+                    } else if (tab.dataset.tab === 'qr17') {
+                        qr17Panel.classList.add('active');
                     } else {
                         convertPanel.classList.add('active');
-                        qrPanel.classList.remove('active');
                     }
                 });
             });
 
             // ==================================================
-            // 子标签切换
+            // 子标签切换（28位面板）
             // ==================================================
-            const subTabs = document.querySelectorAll('.sub-tab');
+            const qrSubTabs = document.querySelectorAll('#qrPanel .sub-tab');
             const batchPanel = document.getElementById('batchPanel');
             const singlePanel = document.getElementById('singlePanel');
-
-            subTabs.forEach(tab => {
+            qrSubTabs.forEach(tab => {
                 tab.addEventListener('click', () => {
-                    subTabs.forEach(t => t.classList.remove('active'));
+                    qrSubTabs.forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
                     if (tab.dataset.sub === 'batch') {
                         batchPanel.classList.add('active');
@@ -1188,6 +1294,26 @@
                     } else {
                         singlePanel.classList.add('active');
                         batchPanel.classList.remove('active');
+                    }
+                });
+            });
+
+            // ==================================================
+            // 子标签切换（17位面板）
+            // ==================================================
+            const qr17SubTabs = document.querySelectorAll('#qr17Panel .sub-tab');
+            const qr17NewPanel = document.getElementById('qr17NewPanel');
+            const qr17OldPanel = document.getElementById('qr17OldPanel');
+            qr17SubTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    qr17SubTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    if (tab.dataset.sub17 === 'new') {
+                        qr17NewPanel.classList.add('active');
+                        qr17OldPanel.classList.remove('active');
+                    } else {
+                        qr17OldPanel.classList.add('active');
+                        qr17NewPanel.classList.remove('active');
                     }
                 });
             });
@@ -1202,16 +1328,13 @@
             const modalUid = document.getElementById('modalUid');
             const modalClose = document.getElementById('modalClose');
             const modalDlBtn = document.getElementById('modalDlBtn');
-            let modalCurrentLid = '';
-            let modalCurrentModuleId = '';
+            let modalCurrentFilename = '';
 
-            function openModal(lid, moduleId, fullCode) {
-                modalLid.textContent = lid;
+            function openModal(title, fullCode, uid, filename) {
+                modalLid.textContent = title;
                 modalCode.textContent = fullCode;
-                modalCurrentLid = lid;
-                modalCurrentModuleId = moduleId;
+                modalCurrentFilename = filename || title;
 
-                const uid = safeLidToUid(lid, moduleId);
                 if (uid) {
                     modalUid.textContent = uid;
                     modalUid.style.display = 'block';
@@ -1257,101 +1380,15 @@
                 if (dataUrl) {
                     const a = document.createElement('a');
                     a.href = dataUrl;
-                    a.download = `qrcode_${modalCurrentLid}_${modalCurrentModuleId}.png`;
+                    a.download = `qrcode_${modalCurrentFilename}.png`;
                     a.click();
                 }
             });
 
             // ==================================================
-            // 批量模式
+            // 通用：创建二维码行
             // ==================================================
-            const batchLidStart = document.getElementById('batchLidStart');
-            const batchCount = document.getElementById('batchCount');
-            const batchLidEnd = document.getElementById('batchLidEnd');
-            const batchModuleId = document.getElementById('batchModuleId');
-            const batchGenerateBtn = document.getElementById('batchGenerateBtn');
-            const batchClearBtn = document.getElementById('batchClearBtn');
-            const batchError = document.getElementById('batchError');
-            const batchResult = document.getElementById('batchResult');
-            const progressBar = document.getElementById('progressBar');
-            const progressFill = document.getElementById('progressFill');
-            const rangeHint = document.getElementById('rangeHint');
-
-            function computeEndLid(start, count) {
-                if (start.length !== 13) return null;
-                if (!isValidLid(start)) return null;
-                if (count < 1) return null;
-                const last2 = start.slice(11);
-                if (!/^[0-9]{2}$/.test(last2)) return null;
-                const startNum = parseInt(last2, 10);
-                const endNum = startNum + count - 1;
-                if (endNum > 99) return null;
-                return start.slice(0, 11) + endNum.toString().padStart(2, '0');
-            }
-
-            function updateRangeHint() {
-                const start = batchLidStart.value.trim();
-                const count = parseInt(batchCount.value, 10);
-                batchError.textContent = '';
-                batchLidStart.classList.remove('error');
-                batchCount.classList.remove('error');
-                batchModuleId.classList.remove('error');
-
-                if (!start) {
-                    rangeHint.className = 'range-hint';
-                    rangeHint.innerHTML = '💡 请输入起始 LID';
-                    batchLidEnd.value = '';
-                    return;
-                }
-                if (start.length !== 13) {
-                    rangeHint.className = 'range-hint error';
-                    rangeHint.innerHTML = `⚠️ LID 必须为13位，当前 ${start.length} 位`;
-                    batchLidEnd.value = '';
-                    return;
-                }
-                if (!isValidLid(start)) {
-                    rangeHint.className = 'range-hint error';
-                    rangeHint.innerHTML = '⚠️ LID 只能包含数字和字母';
-                    batchLidEnd.value = '';
-                    return;
-                }
-                const last2 = start.slice(11);
-                if (!/^[0-9]{2}$/.test(last2)) {
-                    rangeHint.className = 'range-hint error';
-                    rangeHint.innerHTML = `⚠️ LID 最后两位必须是数字 (当前: "${last2}")`;
-                    batchLidEnd.value = '';
-                    return;
-                }
-                if (!count || count < 1) {
-                    rangeHint.className = 'range-hint';
-                    rangeHint.innerHTML = '💡 请输入数量 (≥1)';
-                    batchLidEnd.value = '';
-                    return;
-                }
-                if (count > 100) {
-                    rangeHint.className = 'range-hint error';
-                    rangeHint.innerHTML = '⚠️ 数量最多 100 个';
-                    batchLidEnd.value = '';
-                    return;
-                }
-                const startNum = parseInt(last2, 10);
-                const endNum = startNum + count - 1;
-                if (endNum > 99) {
-                    rangeHint.className = 'range-hint error';
-                    rangeHint.innerHTML = `⚠️ 从 ${start} 开始 ${count} 个会超出99，请减少数量`;
-                    batchLidEnd.value = '';
-                    return;
-                }
-                const endLid = computeEndLid(start, count);
-                batchLidEnd.value = endLid;
-                rangeHint.className = 'range-hint ok';
-                rangeHint.innerHTML = `✅ 将生成 <strong>${count}</strong> 个 · <code>${start}</code> → <code>${endLid}</code>`;
-            }
-
-            batchLidStart.addEventListener('input', updateRangeHint);
-            batchCount.addEventListener('input', updateRangeHint);
-
-            function createQrRow(lid, moduleId, index) {
+            function createQrRow(title, fullCode, uid, downloadFilename) {
                 const row = document.createElement('div');
                 row.className = 'qr-row';
 
@@ -1373,7 +1410,7 @@
                     if (dataUrl) {
                         const a = document.createElement('a');
                         a.href = dataUrl;
-                        a.download = `qrcode_${lid}_${moduleId}.png`;
+                        a.download = `qrcode_${downloadFilename}.png`;
                         a.click();
                     }
                 });
@@ -1386,23 +1423,19 @@
 
                 const idxBadge = document.createElement('div');
                 idxBadge.className = 'idx-badge';
-                idxBadge.textContent = `#${index + 1}`;
+                idxBadge.textContent = `#1`;
 
                 const lidLabel = document.createElement('div');
                 lidLabel.className = 'lid-label';
-                lidLabel.textContent = lid;
+                lidLabel.textContent = title;
 
                 infoTop.appendChild(idxBadge);
                 infoTop.appendChild(lidLabel);
 
-                let fullCode = '';
-                try { fullCode = generate28Code(lid, moduleId); } catch (e) { fullCode = '编码错误'; }
-                const uid = safeLidToUid(lid, moduleId);
-
                 const codeLine = document.createElement('div');
                 codeLine.className = 'info-line';
                 codeLine.innerHTML = `
-                    <div class="info-label">28位编码</div>
+                    <div class="info-label">${fullCode.length}位编码</div>
                     <div class="code-full">${fullCode}</div>
                 `;
                 info.appendChild(infoTop);
@@ -1423,7 +1456,7 @@
                 row.appendChild(dlBtn);
 
                 imgWrap.addEventListener('click', () => {
-                    openModal(lid, moduleId, fullCode);
+                    openModal(title, fullCode, uid, downloadFilename);
                 });
 
                 row._qrImgWrap = imgWrap;
@@ -1432,30 +1465,79 @@
                 return row;
             }
 
-            function batchGenerate() {
-                batchError.textContent = '';
-                batchLidStart.classList.remove('error');
-                batchCount.classList.remove('error');
-                batchModuleId.classList.remove('error');
+            function renderQrInRow(row, fullCode) {
+                try {
+                    new QRCode(row._qrImgWrap, {
+                        text: fullCode,
+                        width: 170,
+                        height: 170,
+                        colorDark: '#0b1b2f',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                } catch (err) {
+                    console.error('二维码生成失败:', err);
+                    row._qrImgWrap.innerHTML = '<div style="color:#c53030;font-size:0.8rem;">生成失败</div>';
+                }
+            }
 
-                const start = batchLidStart.value.trim();
-                const count = parseInt(batchCount.value, 10);
-                const moduleId = batchModuleId.value.trim();
-
-                if (!start) { batchError.textContent = 'LID 起始不能为空'; batchLidStart.classList.add('error'); return; }
-                if (start.length !== 13) { batchError.textContent = `LID 起始必须为13位，当前${start.length}位`; batchLidStart.classList.add('error'); return; }
-                if (!isValidLid(start)) { batchError.textContent = 'LID 只能包含数字和字母'; batchLidStart.classList.add('error'); return; }
+            // ==================================================
+            // 通用：自动计算 LID 结束
+            // ==================================================
+            function computeEndLid(start, count) {
+                if (start.length !== 13) return null;
+                if (!isValidLid(start)) return null;
+                if (count < 1) return null;
                 const last2 = start.slice(11);
-                if (!/^[0-9]{2}$/.test(last2)) { batchError.textContent = 'LID 最后两位必须是数字 (00-99)'; batchLidStart.classList.add('error'); return; }
-                if (!count || count < 1) { batchError.textContent = '数量必须 ≥ 1'; batchCount.classList.add('error'); return; }
-                if (count > 100) { batchError.textContent = '数量最多 100 个'; batchCount.classList.add('error'); return; }
+                if (!/^[0-9]{2}$/.test(last2)) return null;
                 const startNum = parseInt(last2, 10);
                 const endNum = startNum + count - 1;
-                if (endNum > 99) { batchError.textContent = `从该起始值开始 ${count} 个会超出99，请减少数量`; batchCount.classList.add('error'); return; }
-                if (!moduleId) { batchError.textContent = '模块ID 不能为空'; batchModuleId.classList.add('error'); return; }
-                if (moduleId.length !== 4) { batchError.textContent = `模块ID 必须为4位，当前${moduleId.length}位`; batchModuleId.classList.add('error'); return; }
-                if (!isValidModuleId(moduleId)) { batchError.textContent = '模块ID 只能包含数字和字母'; batchModuleId.classList.add('error'); return; }
+                if (endNum > 99) return null;
+                return start.slice(0, 11) + endNum.toString().padStart(2, '0');
+            }
 
+            // ==================================================
+            // 通用：批量生成
+            // type: 'qr28' | 'qr17new' | 'qr17old'
+            // ==================================================
+            function doBatchGenerate(opts) {
+                const start = opts.startInput.value.trim();
+                const count = parseInt(opts.countInput.value, 10);
+                const endInput = opts.endInput;
+                const hintEl = opts.hintEl;
+                const errorEl = opts.errorEl;
+                const resultEl = opts.resultEl;
+                const progressBar = opts.progressBar;
+                const progressFill = opts.progressFill;
+                const type = opts.type;
+
+                errorEl.textContent = '';
+                opts.startInput.classList.remove('error');
+                opts.countInput.classList.remove('error');
+                if (opts.moduleIdInput) opts.moduleIdInput.classList.remove('error');
+
+                // LID 校验
+                if (!start) { errorEl.textContent = 'LID 起始不能为空'; opts.startInput.classList.add('error'); return; }
+                if (start.length !== 13) { errorEl.textContent = `LID 起始必须为13位，当前${start.length}位`; opts.startInput.classList.add('error'); return; }
+                if (!isValidLid(start)) { errorEl.textContent = 'LID 只能包含数字和字母'; opts.startInput.classList.add('error'); return; }
+                const last2 = start.slice(11);
+                if (!/^[0-9]{2}$/.test(last2)) { errorEl.textContent = 'LID 最后两位必须是数字 (00-99)'; opts.startInput.classList.add('error'); return; }
+                if (!count || count < 1) { errorEl.textContent = '数量必须 ≥ 1'; opts.countInput.classList.add('error'); return; }
+                if (count > 100) { errorEl.textContent = '数量最多 100 个'; opts.countInput.classList.add('error'); return; }
+                const startNum = parseInt(last2, 10);
+                const endNum = startNum + count - 1;
+                if (endNum > 99) { errorEl.textContent = `从该起始值开始 ${count} 个会超出99，请减少数量`; opts.countInput.classList.add('error'); return; }
+
+                // 各类型特有校验
+                let moduleId = '';
+                if (type === 'qr28' || type === 'qr17new') {
+                    moduleId = opts.moduleIdInput.value.trim();
+                    if (!moduleId) { errorEl.textContent = '模块ID 不能为空'; opts.moduleIdInput.classList.add('error'); return; }
+                    if (moduleId.length !== 4) { errorEl.textContent = `模块ID 必须为4位，当前${moduleId.length}位`; opts.moduleIdInput.classList.add('error'); return; }
+                    if (!isValidModuleId(moduleId)) { errorEl.textContent = '模块ID 只能包含数字和字母'; opts.moduleIdInput.classList.add('error'); return; }
+                }
+
+                // 生成 LID 列表
                 const prefix = start.slice(0, 11);
                 const lidList = [];
                 for (let i = startNum; i <= endNum; i++) {
@@ -1464,7 +1546,7 @@
 
                 progressBar.classList.add('active');
                 progressFill.style.width = '0%';
-                batchResult.innerHTML = '';
+                resultEl.innerHTML = '';
 
                 const header = document.createElement('div');
                 header.className = 'batch-header';
@@ -1472,11 +1554,11 @@
                     <div class="batch-title"><span>📋</span> 生成结果</div>
                     <div class="batch-count">共 ${lidList.length} 个</div>
                 `;
-                batchResult.appendChild(header);
+                resultEl.appendChild(header);
 
                 const list = document.createElement('div');
                 list.className = 'qr-list';
-                batchResult.appendChild(list);
+                resultEl.appendChild(list);
 
                 let i = 0;
                 const total = lidList.length;
@@ -1491,22 +1573,30 @@
                         return;
                     }
                     const lid = lidList[i];
-                    const row = createQrRow(lid, moduleId, i);
-                    list.appendChild(row);
-
+                    let fullCode = '';
+                    let uid = '';
+                    let filename = '';
                     try {
-                        new QRCode(row._qrImgWrap, {
-                            text: row._fullCode,
-                            width: 170,
-                            height: 170,
-                            colorDark: '#0b1b2f',
-                            colorLight: '#ffffff',
-                            correctLevel: QRCode.CorrectLevel.H
-                        });
-                    } catch (err) {
-                        console.error('二维码生成失败:', err);
-                        row._qrImgWrap.innerHTML = '<div style="color:#c53030;font-size:0.8rem;">生成失败</div>';
+                        if (type === 'qr28') {
+                            fullCode = generate28Code(lid, moduleId);
+                            uid = safeLidToUid(lid, moduleId);
+                            filename = `${lid}_${moduleId}`;
+                        } else if (type === 'qr17new') {
+                            fullCode = generate17NewCode(lid, moduleId);
+                            filename = `${lid}_${moduleId}_17new`;
+                        } else {
+                            fullCode = generate17OldCode(lid);
+                            filename = `${lid}_17old`;
+                        }
+                    } catch (e) {
+                        fullCode = '编码错误';
                     }
+
+                    const row = createQrRow(lid, fullCode, uid, filename);
+                    const badge = row.querySelector('.idx-badge');
+                    if (badge) badge.textContent = `#${i + 1}`;
+                    list.appendChild(row);
+                    renderQrInRow(row, fullCode);
 
                     i++;
                     progressFill.style.width = Math.round((i / total) * 100) + '%';
@@ -1515,7 +1605,60 @@
                 processNext();
             }
 
-            batchGenerateBtn.addEventListener('click', batchGenerate);
+            // ==================================================
+            // 28位 批量
+            // ==================================================
+            const batchLidStart = document.getElementById('batchLidStart');
+            const batchCount = document.getElementById('batchCount');
+            const batchLidEnd = document.getElementById('batchLidEnd');
+            const batchModuleId = document.getElementById('batchModuleId');
+            const batchGenerateBtn = document.getElementById('batchGenerateBtn');
+            const batchClearBtn = document.getElementById('batchClearBtn');
+            const batchError = document.getElementById('batchError');
+            const batchResult = document.getElementById('batchResult');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            const rangeHint = document.getElementById('rangeHint');
+
+            function updateRangeHint28() {
+                const start = batchLidStart.value.trim();
+                const count = parseInt(batchCount.value, 10);
+                batchError.textContent = '';
+                batchLidStart.classList.remove('error');
+                batchCount.classList.remove('error');
+                batchModuleId.classList.remove('error');
+                if (!start) { rangeHint.className = 'range-hint'; rangeHint.innerHTML = '💡 请输入起始 LID'; batchLidEnd.value = ''; return; }
+                if (start.length !== 13) { rangeHint.className = 'range-hint error'; rangeHint.innerHTML = `⚠️ LID 必须为13位，当前 ${start.length} 位`; batchLidEnd.value = ''; return; }
+                if (!isValidLid(start)) { rangeHint.className = 'range-hint error'; rangeHint.innerHTML = '⚠️ LID 只能包含数字和字母'; batchLidEnd.value = ''; return; }
+                const last2 = start.slice(11);
+                if (!/^[0-9]{2}$/.test(last2)) { rangeHint.className = 'range-hint error'; rangeHint.innerHTML = `⚠️ LID 最后两位必须是数字 (当前: "${last2}")`; batchLidEnd.value = ''; return; }
+                if (!count || count < 1) { rangeHint.className = 'range-hint'; rangeHint.innerHTML = '💡 请输入数量 (≥1)'; batchLidEnd.value = ''; return; }
+                if (count > 100) { rangeHint.className = 'range-hint error'; rangeHint.innerHTML = '⚠️ 数量最多 100 个'; batchLidEnd.value = ''; return; }
+                const startNum = parseInt(last2, 10);
+                const endNum = startNum + count - 1;
+                if (endNum > 99) { rangeHint.className = 'range-hint error'; rangeHint.innerHTML = `⚠️ 从 ${start} 开始 ${count} 个会超出99，请减少数量`; batchLidEnd.value = ''; return; }
+                const endLid = computeEndLid(start, count);
+                batchLidEnd.value = endLid;
+                rangeHint.className = 'range-hint ok';
+                rangeHint.innerHTML = `✅ 将生成 <strong>${count}</strong> 个 · <code>${start}</code> → <code>${endLid}</code>`;
+            }
+            batchLidStart.addEventListener('input', updateRangeHint28);
+            batchCount.addEventListener('input', updateRangeHint28);
+
+            batchGenerateBtn.addEventListener('click', () => {
+                doBatchGenerate({
+                    startInput: batchLidStart,
+                    countInput: batchCount,
+                    endInput: batchLidEnd,
+                    moduleIdInput: batchModuleId,
+                    hintEl: rangeHint,
+                    errorEl: batchError,
+                    resultEl: batchResult,
+                    progressBar: progressBar,
+                    progressFill: progressFill,
+                    type: 'qr28'
+                });
+            });
             batchClearBtn.addEventListener('click', () => {
                 batchLidStart.value = '';
                 batchCount.value = '10';
@@ -1525,20 +1668,147 @@
                 batchLidStart.classList.remove('error');
                 batchCount.classList.remove('error');
                 batchModuleId.classList.remove('error');
-                batchResult.innerHTML = `
-                    <div class="empty-state">
-                        <span class="big">🖼️</span>
-                        输入起始 LID 和数量，点击生成
-                    </div>
-                `;
+                batchResult.innerHTML = `<div class="empty-state"><span class="big">🖼️</span>输入起始 LID 和数量，点击生成</div>`;
                 rangeHint.className = 'range-hint';
                 rangeHint.innerHTML = '💡 输入起始 LID 和数量，自动计算结束 LID';
             });
-
-            updateRangeHint();
+            updateRangeHint28();
 
             // ==================================================
-            // 单个模式
+            // 17位 - 新
+            // ==================================================
+            const qr17NewLidStart = document.getElementById('qr17NewLidStart');
+            const qr17NewCount = document.getElementById('qr17NewCount');
+            const qr17NewLidEnd = document.getElementById('qr17NewLidEnd');
+            const qr17NewModuleId = document.getElementById('qr17NewModuleId');
+            const qr17NewGenerateBtn = document.getElementById('qr17NewGenerateBtn');
+            const qr17NewClearBtn = document.getElementById('qr17NewClearBtn');
+            const qr17NewError = document.getElementById('qr17NewError');
+            const qr17NewResult = document.getElementById('qr17NewResult');
+            const qr17NewProgressBar = document.getElementById('qr17NewProgressBar');
+            const qr17NewProgressFill = document.getElementById('qr17NewProgressFill');
+            const qr17NewHint = document.getElementById('qr17NewHint');
+
+            function updateRangeHint17New() {
+                const start = qr17NewLidStart.value.trim();
+                const count = parseInt(qr17NewCount.value, 10);
+                qr17NewError.textContent = '';
+                qr17NewLidStart.classList.remove('error');
+                qr17NewCount.classList.remove('error');
+                qr17NewModuleId.classList.remove('error');
+                if (!start) { qr17NewHint.className = 'range-hint'; qr17NewHint.innerHTML = '💡 请输入起始 LID'; qr17NewLidEnd.value = ''; return; }
+                if (start.length !== 13) { qr17NewHint.className = 'range-hint error'; qr17NewHint.innerHTML = `⚠️ LID 必须为13位，当前 ${start.length} 位`; qr17NewLidEnd.value = ''; return; }
+                if (!isValidLid(start)) { qr17NewHint.className = 'range-hint error'; qr17NewHint.innerHTML = '⚠️ LID 只能包含数字和字母'; qr17NewLidEnd.value = ''; return; }
+                const last2 = start.slice(11);
+                if (!/^[0-9]{2}$/.test(last2)) { qr17NewHint.className = 'range-hint error'; qr17NewHint.innerHTML = `⚠️ LID 最后两位必须是数字`; qr17NewLidEnd.value = ''; return; }
+                if (!count || count < 1) { qr17NewHint.className = 'range-hint'; qr17NewHint.innerHTML = '💡 请输入数量 (≥1)'; qr17NewLidEnd.value = ''; return; }
+                if (count > 100) { qr17NewHint.className = 'range-hint error'; qr17NewHint.innerHTML = '⚠️ 数量最多 100 个'; qr17NewLidEnd.value = ''; return; }
+                const startNum = parseInt(last2, 10);
+                const endNum = startNum + count - 1;
+                if (endNum > 99) { qr17NewHint.className = 'range-hint error'; qr17NewHint.innerHTML = `⚠️ 从 ${start} 开始 ${count} 个会超出99，请减少数量`; qr17NewLidEnd.value = ''; return; }
+                const endLid = computeEndLid(start, count);
+                qr17NewLidEnd.value = endLid;
+                qr17NewHint.className = 'range-hint ok';
+                qr17NewHint.innerHTML = `✅ 将生成 <strong>${count}</strong> 个新17位 · <code>${start}</code> → <code>${endLid}</code>`;
+            }
+            qr17NewLidStart.addEventListener('input', updateRangeHint17New);
+            qr17NewCount.addEventListener('input', updateRangeHint17New);
+
+            qr17NewGenerateBtn.addEventListener('click', () => {
+                doBatchGenerate({
+                    startInput: qr17NewLidStart,
+                    countInput: qr17NewCount,
+                    endInput: qr17NewLidEnd,
+                    moduleIdInput: qr17NewModuleId,
+                    hintEl: qr17NewHint,
+                    errorEl: qr17NewError,
+                    resultEl: qr17NewResult,
+                    progressBar: qr17NewProgressBar,
+                    progressFill: qr17NewProgressFill,
+                    type: 'qr17new'
+                });
+            });
+            qr17NewClearBtn.addEventListener('click', () => {
+                qr17NewLidStart.value = '';
+                qr17NewCount.value = '10';
+                qr17NewLidEnd.value = '';
+                qr17NewModuleId.value = '';
+                qr17NewError.textContent = '';
+                qr17NewLidStart.classList.remove('error');
+                qr17NewCount.classList.remove('error');
+                qr17NewModuleId.classList.remove('error');
+                qr17NewResult.innerHTML = `<div class="empty-state"><span class="big">🔳</span>输入起始 LID 和数量，点击生成</div>`;
+                qr17NewHint.className = 'range-hint';
+                qr17NewHint.innerHTML = '💡 新17位 = 13位LID + 4位模块ID，LID最后两位递增';
+            });
+            updateRangeHint17New();
+
+            // ==================================================
+            // 17位 - 旧
+            // ==================================================
+            const qr17OldLidStart = document.getElementById('qr17OldLidStart');
+            const qr17OldCount = document.getElementById('qr17OldCount');
+            const qr17OldLidEnd = document.getElementById('qr17OldLidEnd');
+            const qr17OldGenerateBtn = document.getElementById('qr17OldGenerateBtn');
+            const qr17OldClearBtn = document.getElementById('qr17OldClearBtn');
+            const qr17OldError = document.getElementById('qr17OldError');
+            const qr17OldResult = document.getElementById('qr17OldResult');
+            const qr17OldProgressBar = document.getElementById('qr17OldProgressBar');
+            const qr17OldProgressFill = document.getElementById('qr17OldProgressFill');
+            const qr17OldHint = document.getElementById('qr17OldHint');
+
+            function updateRangeHint17Old() {
+                const start = qr17OldLidStart.value.trim();
+                const count = parseInt(qr17OldCount.value, 10);
+                qr17OldError.textContent = '';
+                qr17OldLidStart.classList.remove('error');
+                qr17OldCount.classList.remove('error');
+                if (!start) { qr17OldHint.className = 'range-hint'; qr17OldHint.innerHTML = '💡 请输入起始 LID'; qr17OldLidEnd.value = ''; return; }
+                if (start.length !== 13) { qr17OldHint.className = 'range-hint error'; qr17OldHint.innerHTML = `⚠️ LID 必须为13位，当前 ${start.length} 位`; qr17OldLidEnd.value = ''; return; }
+                if (!isValidLid(start)) { qr17OldHint.className = 'range-hint error'; qr17OldHint.innerHTML = '⚠️ LID 只能包含数字和字母'; qr17OldLidEnd.value = ''; return; }
+                const last2 = start.slice(11);
+                if (!/^[0-9]{2}$/.test(last2)) { qr17OldHint.className = 'range-hint error'; qr17OldHint.innerHTML = `⚠️ LID 最后两位必须是数字`; qr17OldLidEnd.value = ''; return; }
+                if (!count || count < 1) { qr17OldHint.className = 'range-hint'; qr17OldHint.innerHTML = '💡 请输入数量 (≥1)'; qr17OldLidEnd.value = ''; return; }
+                if (count > 100) { qr17OldHint.className = 'range-hint error'; qr17OldHint.innerHTML = '⚠️ 数量最多 100 个'; qr17OldLidEnd.value = ''; return; }
+                const startNum = parseInt(last2, 10);
+                const endNum = startNum + count - 1;
+                if (endNum > 99) { qr17OldHint.className = 'range-hint error'; qr17OldHint.innerHTML = `⚠️ 从 ${start} 开始 ${count} 个会超出99，请减少数量`; qr17OldLidEnd.value = ''; return; }
+                const endLid = computeEndLid(start, count);
+                qr17OldLidEnd.value = endLid;
+                qr17OldHint.className = 'range-hint ok';
+                qr17OldHint.innerHTML = `✅ 将生成 <strong>${count}</strong> 个旧17位 · <code>${start}24${start.slice(11)}</code> → <code>${endLid}24${endLid.slice(11)}</code>`;
+            }
+            qr17OldLidStart.addEventListener('input', updateRangeHint17Old);
+            qr17OldCount.addEventListener('input', updateRangeHint17Old);
+
+            qr17OldGenerateBtn.addEventListener('click', () => {
+                doBatchGenerate({
+                    startInput: qr17OldLidStart,
+                    countInput: qr17OldCount,
+                    endInput: qr17OldLidEnd,
+                    hintEl: qr17OldHint,
+                    errorEl: qr17OldError,
+                    resultEl: qr17OldResult,
+                    progressBar: qr17OldProgressBar,
+                    progressFill: qr17OldProgressFill,
+                    type: 'qr17old'
+                });
+            });
+            qr17OldClearBtn.addEventListener('click', () => {
+                qr17OldLidStart.value = '';
+                qr17OldCount.value = '10';
+                qr17OldLidEnd.value = '';
+                qr17OldError.textContent = '';
+                qr17OldLidStart.classList.remove('error');
+                qr17OldCount.classList.remove('error');
+                qr17OldResult.innerHTML = `<div class="empty-state"><span class="big">📜</span>输入起始 LID 和数量，点击生成</div>`;
+                qr17OldHint.className = 'range-hint';
+                qr17OldHint.innerHTML = '💡 旧17位 = 13位LID + 24 + LID最后两位';
+            });
+            updateRangeHint17Old();
+
+            // ==================================================
+            // 28位 - 单个
             // ==================================================
             const singleLid = document.getElementById('singleLid');
             const singleModuleId = document.getElementById('singleModuleId');
@@ -1555,12 +1825,7 @@
 
             function singleResetQRCode() {
                 if (singleQrcodeInstance) { singleQrcodeInstance.clear(); singleQrcodeInstance = null; }
-                singleQrcode.innerHTML = `
-                    <div class="placeholder-text">
-                        <span>⬚</span>
-                        输入 LID 和模块ID 生成二维码
-                    </div>
-                `;
+                singleQrcode.innerHTML = `<div class="placeholder-text"><span>⬚</span>输入 LID 和模块ID 生成二维码</div>`;
                 singleResultInfo.style.display = 'none';
                 singleGeneratedCode.textContent = '—';
                 singleGeneratedUid.textContent = '—';
@@ -1571,24 +1836,19 @@
                 singleError.textContent = '';
                 singleLid.classList.remove('error');
                 singleModuleId.classList.remove('error');
-
                 const lid = singleLid.value.trim();
                 const moduleId = singleModuleId.value.trim();
-
                 if (!lid) { singleError.textContent = 'LID 不能为空'; singleLid.classList.add('error'); singleResetQRCode(); return; }
                 if (lid.length !== 13) { singleError.textContent = `LID 必须为13位，当前${lid.length}位`; singleLid.classList.add('error'); singleResetQRCode(); return; }
                 if (!isValidLid(lid)) { singleError.textContent = 'LID 只能包含数字和字母'; singleLid.classList.add('error'); singleResetQRCode(); return; }
                 if (!moduleId) { singleError.textContent = '模块ID 不能为空'; singleModuleId.classList.add('error'); singleResetQRCode(); return; }
                 if (moduleId.length !== 4) { singleError.textContent = `模块ID 必须为4位，当前${moduleId.length}位`; singleModuleId.classList.add('error'); singleResetQRCode(); return; }
                 if (!isValidModuleId(moduleId)) { singleError.textContent = '模块ID 只能包含数字和字母'; singleModuleId.classList.add('error'); singleResetQRCode(); return; }
-
                 let fullCode;
                 try { fullCode = generate28Code(lid, moduleId); }
                 catch (e) { singleError.textContent = e.message; singleLid.classList.add('error'); singleResetQRCode(); return; }
-
                 if (singleQrcodeInstance) { singleQrcodeInstance.clear(); singleQrcodeInstance = null; }
                 singleQrcode.innerHTML = '';
-
                 try {
                     singleQrcodeInstance = new QRCode(singleQrcode, {
                         text: fullCode,
@@ -1599,17 +1859,14 @@
                         correctLevel: QRCode.CorrectLevel.H
                     });
                 } catch (err) {
-                    console.error('二维码生成失败:', err);
                     singleQrcode.innerHTML = `<div class="placeholder-text" style="color:#c53030;">⚠️ 二维码生成失败</div>`;
                 }
-
                 singleGeneratedCode.textContent = fullCode;
                 const uid = safeLidToUid(lid, moduleId);
                 singleGeneratedUid.textContent = uid || '（无法生成UID，请检查LID格式）';
                 singleResultInfo.style.display = 'block';
                 singleCurrentCode = fullCode;
             }
-
             singleGenerateBtn.addEventListener('click', singleGenerate);
             singleClearBtn.addEventListener('click', () => {
                 singleLid.value = '';
@@ -1629,7 +1886,8 @@
                 if (!singleCurrentCode) return;
                 const lid = singleLid.value.trim();
                 const moduleId = singleModuleId.value.trim();
-                openModal(lid, moduleId, singleCurrentCode);
+                const uid = safeLidToUid(lid, moduleId);
+                openModal(lid, singleCurrentCode, uid, `${lid}_${moduleId}`);
             });
 
             // ==================================================
@@ -1711,20 +1969,17 @@
                 const lid = lidResult.textContent;
                 const moduleId = moduleResult.textContent;
                 if (!lid || !moduleId) return;
-
                 singleLid.value = lid;
                 singleModuleId.value = moduleId;
-
                 topTabs.forEach(t => t.classList.remove('active'));
                 document.querySelector('.top-tab[data-tab="qr"]').classList.add('active');
                 qrPanel.classList.add('active');
+                qr17Panel.classList.remove('active');
                 convertPanel.classList.remove('active');
-
-                subTabs.forEach(t => t.classList.remove('active'));
+                qrSubTabs.forEach(t => t.classList.remove('active'));
                 document.querySelector('.sub-tab[data-sub="single"]').classList.add('active');
                 singlePanel.classList.add('active');
                 batchPanel.classList.remove('active');
-
                 setTimeout(() => { singleGenerate(); }, 100);
             });
 
@@ -1740,7 +1995,7 @@
             });
 
             // ==================================================
-            // 初始化
+            // 页面加载后自动生成 28位 默认示例
             // ==================================================
             window.addEventListener('load', function() {
                 setTimeout(function() {
@@ -1748,7 +2003,9 @@
                         const start = batchLidStart.value.trim();
                         const count = parseInt(batchCount.value, 10);
                         const moduleId = batchModuleId.value.trim();
-                        if (start && count && moduleId) batchGenerate();
+                        if (start && count && moduleId) {
+                            batchGenerateBtn.click();
+                        }
                     } catch (e) {}
                 }, 300);
             });
