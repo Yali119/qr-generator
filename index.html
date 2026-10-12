@@ -11,10 +11,24 @@
         }
     </script>
     <style>
+        /* ===== 字体：与 DSH 桌面端界面保持一致 ===== */
+        :root {
+            /* 界面字体（等同界面变量 --dsw-font-family） */
+            --ui-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            /* 代码 / 编码字体（等同界面变量 --ds-font-family-code） */
+            --code-font: 'SF Mono', 'JetBrains Mono', 'Fira Code', Consolas, 'Liberation Mono', Menlo, Courier, 'PingFang SC', 'Microsoft YaHei';
+        }
         * {
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+            font-family: var(--ui-font);
             -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-autospace: normal;
+        }
+        /* 行内代码 / 编码统一用等宽字体，与界面一致 */
+        code, kbd, samp, pre {
+            font-family: var(--code-font);
         }
         body {
             background: #f5f7fb;
@@ -191,7 +205,7 @@
             border-radius: 16px;
             border: 1.5px solid #d0dae6;
             font-size: 1rem;
-            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-family: var(--code-font);
             transition: 0.2s;
             background: #fbfdff;
             width: 100%;
@@ -365,7 +379,7 @@
             flex-shrink: 0;
         }
         .qr-row .lid-label {
-            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-family: var(--code-font);
             font-size: 0.9rem;
             font-weight: 700;
             color: #1e3a5f;
@@ -388,7 +402,7 @@
             font-weight: 600;
         }
         .qr-row .code-full {
-            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-family: var(--code-font);
             font-size: 0.76rem;
             font-weight: 600;
             color: #0b1b2f;
@@ -400,7 +414,7 @@
             line-height: 1.4;
         }
         .qr-row .code-uid {
-            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-family: var(--code-font);
             font-size: 0.76rem;
             font-weight: 600;
             color: #6b21a8;
@@ -461,13 +475,15 @@
             margin-bottom: 16px;
             min-height: 240px;
         }
-        #singleQrcode {
+        #singleQrcode,
+        #single17Qrcode {
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: zoom-in;
         }
-        #singleQrcode img {
+        #singleQrcode img,
+        #single17Qrcode img {
             display: block;
             max-width: 100%;
             height: auto;
@@ -491,7 +507,7 @@
             margin-bottom: 6px;
         }
         .result-code {
-            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-family: var(--code-font);
             font-size: 1rem;
             font-weight: 600;
             color: #0b1b2f;
@@ -758,7 +774,7 @@
             text-align: center;
         }
         .modal-lid {
-            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-family: var(--code-font);
             font-size: 1rem;
             font-weight: 700;
             color: #1e3a5f;
@@ -769,7 +785,7 @@
             word-break: break-all;
         }
         .modal-code {
-            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-family: var(--code-font);
             font-size: 0.78rem;
             font-weight: 600;
             color: #0b1b2f;
@@ -781,7 +797,7 @@
             line-height: 1.5;
         }
         .modal-uid {
-            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-family: var(--code-font);
             font-size: 0.78rem;
             font-weight: 600;
             color: #6b21a8;
@@ -980,6 +996,9 @@
                 <button class="sub-tab" data-sub17="old">
                     <span>📜</span> 旧17位
                 </button>
+                <button class="sub-tab" data-sub17="custom">
+                    <span>🔢</span> 自定义
+                </button>
             </div>
 
             <!-- ===== 新17位：13位LID + 4位模块ID ===== -->
@@ -1067,6 +1086,43 @@
                     <strong>📐 旧17位编码规则</strong>
                     示例：LID <code>6160907Q99900</code>，其最后两位为 <code>00</code><br>
                     → 最终：<code>6160907Q99900</code> + <code>24</code> + <code>00</code> = <code>6160907Q999002400</code>（17位）
+                </div>
+            </div>
+
+            <!-- ===== 自定义17位：13位LID + 4位任意数字 ===== -->
+            <div class="sub-panel" id="qr17CustomPanel">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>LID <span class="badge">13位</span></label>
+                        <input type="text" id="single17Lid" placeholder="6160907Q99900" maxlength="13" autocomplete="off" value="6160907Q99900">
+                    </div>
+                    <div class="input-group">
+                        <label>后四位数字 <span class="badge">0000-9999</span></label>
+                        <input type="text" id="single17Suffix" placeholder="1234" maxlength="4" inputmode="numeric" autocomplete="off" value="0000">
+                    </div>
+                </div>
+                <div class="error-message" id="single17Error"></div>
+                <div class="actions">
+                    <button class="btn btn-primary" id="single17GenerateBtn">✨ 生成二维码</button>
+                    <button class="btn" id="single17ClearBtn">清空</button>
+                </div>
+                <div class="single-qr-wrapper">
+                    <div id="single17Qrcode">
+                        <div class="placeholder-text">
+                            <span>⬚</span>
+                            输入 LID 和 4 位数字生成二维码
+                        </div>
+                    </div>
+                </div>
+                <div class="result-info" id="single17ResultInfo" style="display: none;">
+                    <div class="result-label">17位编码</div>
+                    <div class="result-code" id="single17GeneratedCode">—</div>
+                </div>
+                <div class="rule-hint">
+                    <strong>📐 自定义17位编码规则</strong>
+                    示例：LID <code>6160907Q99900</code> + 后四位数字 <code>1234</code><br>
+                    → 最终：<code>6160907Q99900</code> + <code>1234</code> = <code>6160907Q999001234</code>（17位）<br>
+                    后四位必须是 <code>0000-9999</code> 的纯数字，可自由填写，不受模块ID限制。
                 </div>
             </div>
         </div>
@@ -1192,6 +1248,12 @@
                 if (code.length !== 17) throw new Error(`旧17位长度 ${code.length}，应为17位`);
                 return code;
             }
+            // 自定义17位：13位LID + 4位任意数字
+            function generate17CustomCode(lid, digits) {
+                const code = lid + digits;
+                if (code.length !== 17) throw new Error(`自定义17位长度 ${code.length}，应为17位`);
+                return code;
+            }
 
             // ========== UID 相关 ==========
             function charToAsciiHighLow(char) {
@@ -1304,17 +1366,20 @@
             const qr17SubTabs = document.querySelectorAll('#qr17Panel .sub-tab');
             const qr17NewPanel = document.getElementById('qr17NewPanel');
             const qr17OldPanel = document.getElementById('qr17OldPanel');
+            const qr17CustomPanel = document.getElementById('qr17CustomPanel');
+            const qr17PanelMap = {
+                'new': qr17NewPanel,
+                'old': qr17OldPanel,
+                'custom': qr17CustomPanel
+            };
             qr17SubTabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     qr17SubTabs.forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
-                    if (tab.dataset.sub17 === 'new') {
-                        qr17NewPanel.classList.add('active');
-                        qr17OldPanel.classList.remove('active');
-                    } else {
-                        qr17OldPanel.classList.add('active');
-                        qr17NewPanel.classList.remove('active');
-                    }
+                    const target = tab.dataset.sub17;
+                    Object.keys(qr17PanelMap).forEach(key => {
+                        qr17PanelMap[key].classList.toggle('active', key === target);
+                    });
                 });
             });
 
@@ -1806,6 +1871,98 @@
                 qr17OldHint.innerHTML = '💡 旧17位 = 13位LID + 24 + LID最后两位';
             });
             updateRangeHint17Old();
+
+            // ==================================================
+            // 17位 - 自定义单个（13位LID + 4位任意数字）
+            // ==================================================
+            const single17Lid = document.getElementById('single17Lid');
+            const single17Suffix = document.getElementById('single17Suffix');
+            const single17GenerateBtn = document.getElementById('single17GenerateBtn');
+            const single17ClearBtn = document.getElementById('single17ClearBtn');
+            const single17Error = document.getElementById('single17Error');
+            const single17Qrcode = document.getElementById('single17Qrcode');
+            const single17ResultInfo = document.getElementById('single17ResultInfo');
+            const single17GeneratedCode = document.getElementById('single17GeneratedCode');
+
+            let single17QrcodeInstance = null;
+            let single17CurrentCode = '';
+
+            function single17ResetQRCode() {
+                if (single17QrcodeInstance) { single17QrcodeInstance.clear(); single17QrcodeInstance = null; }
+                single17Qrcode.innerHTML = `<div class="placeholder-text"><span>⬚</span>输入 LID 和 4 位数字生成二维码</div>`;
+                single17ResultInfo.style.display = 'none';
+                single17GeneratedCode.textContent = '—';
+                single17CurrentCode = '';
+            }
+
+            function single17Generate() {
+                single17Error.textContent = '';
+                single17Lid.classList.remove('error');
+                single17Suffix.classList.remove('error');
+
+                const lid = single17Lid.value.trim();
+                const suffix = single17Suffix.value.trim();
+
+                if (!lid) { single17Error.textContent = 'LID 不能为空'; single17Lid.classList.add('error'); single17ResetQRCode(); return; }
+                if (lid.length !== 13) { single17Error.textContent = `LID 必须为13位，当前${lid.length}位`; single17Lid.classList.add('error'); single17ResetQRCode(); return; }
+                if (!isValidLid(lid)) { single17Error.textContent = 'LID 只能包含数字和字母'; single17Lid.classList.add('error'); single17ResetQRCode(); return; }
+                if (!suffix) { single17Error.textContent = '后四位数字不能为空'; single17Suffix.classList.add('error'); single17ResetQRCode(); return; }
+                if (suffix.length !== 4) { single17Error.textContent = `后四位必须为4位数字，当前${suffix.length}位`; single17Suffix.classList.add('error'); single17ResetQRCode(); return; }
+                if (!/^[0-9]{4}$/.test(suffix)) { single17Error.textContent = '后四位只能包含数字 (0-9)'; single17Suffix.classList.add('error'); single17ResetQRCode(); return; }
+
+                let fullCode;
+                try { fullCode = generate17CustomCode(lid, suffix); }
+                catch (e) { single17Error.textContent = e.message; single17Lid.classList.add('error'); single17ResetQRCode(); return; }
+
+                if (single17QrcodeInstance) { single17QrcodeInstance.clear(); single17QrcodeInstance = null; }
+                single17Qrcode.innerHTML = '';
+                try {
+                    single17QrcodeInstance = new QRCode(single17Qrcode, {
+                        text: fullCode,
+                        width: 220,
+                        height: 220,
+                        colorDark: '#0b1b2f',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                } catch (err) {
+                    single17Qrcode.innerHTML = `<div class="placeholder-text" style="color:#c53030;">⚠️ 二维码生成失败</div>`;
+                }
+                single17GeneratedCode.textContent = fullCode;
+                single17ResultInfo.style.display = 'block';
+                single17CurrentCode = fullCode;
+            }
+
+            single17GenerateBtn.addEventListener('click', single17Generate);
+            single17ClearBtn.addEventListener('click', () => {
+                single17Lid.value = '';
+                single17Suffix.value = '';
+                single17Error.textContent = '';
+                single17Lid.classList.remove('error');
+                single17Suffix.classList.remove('error');
+                single17ResetQRCode();
+                single17Lid.focus();
+            });
+            [single17Lid, single17Suffix].forEach(el => {
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); single17Generate(); }
+                });
+                el.addEventListener('input', function() {
+                    this.classList.remove('error');
+                    single17Error.textContent = '';
+                });
+            });
+            single17Suffix.addEventListener('input', function() {
+                // 只保留数字，最多4位
+                const cleaned = this.value.replace(/[^0-9]/g, '').slice(0, 4);
+                if (cleaned !== this.value) this.value = cleaned;
+            });
+            single17Qrcode.addEventListener('click', () => {
+                if (!single17CurrentCode) return;
+                const lid = single17Lid.value.trim();
+                const suffix = single17Suffix.value.trim();
+                openModal(lid, single17CurrentCode, '', `${lid}_${suffix}_17custom`);
+            });
 
             // ==================================================
             // 28位 - 单个
